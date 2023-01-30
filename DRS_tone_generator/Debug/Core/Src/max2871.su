@@ -1,3 +1,4 @@
+
 ../Core/Src/max2871.c:11:6:max2871Init	24	static
 ../Core/Src/max2871.c:53:6:max2871GpioInit	8	static
 ../Core/Src/max2871.c:57:6:max2871Write	16	static

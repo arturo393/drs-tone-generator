@@ -20,13 +20,10 @@ void max2871Init(MAX2871_t *ppl) {
 	ppl->ATT = 0.0;
 	ppl->CAL = 0.0;
 	ppl->DIVA = 0x0UL;
-	ppl->register0->INT = 0x0UL; //Enables fractional-N mode
-	ppl->register0->NDIV = 0x0UL;
-	ppl->register0->FRAC = 0x0UL;
-	ppl->register0->ADDR0 =  0x0UL;
 
 
 
+/*
 
 	unsigned long composedRegisterValue;
 
@@ -61,6 +58,7 @@ void max2871Init(MAX2871_t *ppl) {
 		composedRegisterValue = INT << 31 | NDIV << 15 | FRAC << 3 | ADDR0;
 		max2871Write(composedRegisterValue);
 	}
+	*/
 }
 
 void max2871GpioInit(){
@@ -87,6 +85,7 @@ void shiftOut(uint32_t DATAPIN,uint32_t  CLOCKPIN,uint32_t  MSBFIRST,uint32_t  d
 	//
 }
 
+/*
 void CalculateRegisterValues(MAX2871_t *ppl)    //calculates values of NDIV, FRAC & DIVA
 {
   double rest;
@@ -153,4 +152,4 @@ void CalculateRegisterValues(MAX2871_t *ppl)    //calculates values of NDIV, 
   //Serial.println(NDIV);
   //Serial.println(FRAC);
 }
- 
+ */

@@ -131,7 +131,7 @@ typedef struct MAX2871{
 	float ATT;
 	float CAL;
 	unsigned long DIVA;
-	REGISTER0_t *register0;
+
 }MAX2871_t;
 
 

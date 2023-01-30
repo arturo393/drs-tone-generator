@@ -60,8 +60,8 @@ all: main-build
 main-build: DRS_tone_generator.elf secondary-outputs
 
 # Tool invocations
-DRS_tone_generator.elf DRS_tone_generator.map: $(OBJS) $(USER_OBJS) C:\Users\artur\GDrive\development\drs-tone-generator-stm32g030\DRS_tone_generator\STM32G030K6TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "DRS_tone_generator.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\artur\GDrive\development\drs-tone-generator-stm32g030\DRS_tone_generator\STM32G030K6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DRS_tone_generator.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+DRS_tone_generator.elf DRS_tone_generator.map: $(OBJS) $(USER_OBJS) C:\Users\admin\Clone\drs-tone-generator-stm32g030\DRS_tone_generator\STM32G030K6TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "DRS_tone_generator.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\admin\Clone\drs-tone-generator-stm32g030\DRS_tone_generator\STM32G030K6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DRS_tone_generator.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

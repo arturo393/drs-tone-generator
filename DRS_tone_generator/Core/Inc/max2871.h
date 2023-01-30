@@ -119,9 +119,26 @@
 
 #define FREQ_OUT_SIZE 8
 #define LACT_SIZE 2
+#define MCPADR_SIZE 2
+
+typedef struct REGISTER0{
+	//Register 0
+	unsigned long INT; //Enables fractional-N mode
+	unsigned long NDIV;
+	unsigned long FRAC;
+	unsigned long ADDR0;
+}REGISTER0_t ;
+
+typedef struct REGISTER1{
+	//Register 0
+	unsigned long INT; //Enables fractional-N mode
+	unsigned long NDIV;
+	unsigned long FRAC;
+	unsigned long ADDR0;
+}REGISTER1_t ;
 
 typedef struct MAX2871{
-	unsigned long long FreqOUT;
+	unsigned long long FreqOut;
 	unsigned long long FreqOUTold;
 	unsigned long long FMIN;
 	unsigned long long FMAX;
@@ -132,21 +149,25 @@ typedef struct MAX2871{
 	float CAL;
 	unsigned long DIVA;
 	REGISTER0_t *register0;
+
+	int MCPADR;
+	int ATTREGADR;
+	int CALREGADR;
+	unsigned int CALBYTE;
+	unsigned int ATTBYTE;
+
+
 }MAX2871_t;
 
 
-typedef struct REGISTER0{
-	//Register 0
-	unsigned long INT; //Enables fractional-N mode
-	unsigned long NDIV;
-	unsigned long FRAC;
-	unsigned long ADDR0;
-}REGISTER0_t ;
+
 
 
 void max2871Init();
 void max2871Write(unsigned long data);
 void shiftOut(uint32_t DATAPIN, uint32_t CLOCKPIN, uint32_t MSBFIRST,
 		uint32_t data);
+void max2871CalculateRegisterValues(MAX2871_t *ppl); //calculates values of NDIV, FRAC & DIVA
+unsigned long max2871RegisterInit(MAX2871_t *ppl);
 
 #endif /* INC_MAX2871_H_ */

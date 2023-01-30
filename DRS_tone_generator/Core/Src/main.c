@@ -119,12 +119,6 @@ unsigned long RE_time0 = 0;
 unsigned long RE_time1 = 0;
 unsigned long RE_time2 = 0;
 
-const int MCPADR = 0x27;
-const int ATTREGADR = 0x12;    // ATTENUATOR, MCP REG A
-const int CALREGADR = 0x13;    // CALIBRATION, MCP REG B
-unsigned int CALBYTE;
-unsigned int ATTBYTE;
-
 const int EEPROM_ADR = 0x50;
 uint8_t addrList[5] = { 0 };
 /* USER CODE END 0 */
@@ -174,27 +168,41 @@ int main(void) {
 	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
 
 	for (int i = FREQ_OUT_SIZE - 1; i >= 0; i--)
-		ppl.FreqOUT |= (buffer << (i * 8));
+		ppl.FreqOut |= (buffer[i] << (i * 8));
 
 	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR + FREQ_OUT_SIZE,
 	LACT_SIZE);
 	ppl.LACT = buffer[0] + buffer[1] / 2.0;
 
-	if (ppl.FreqOUT == -1) {
-		ppl.FreqOUT = 4000000000;
+	if (ppl.FreqOut == -1) {
+		ppl.FreqOut = 4000000000;
 		ppl.LACT = 12;
 	}
 
 	HAL_Delay(200);
-	CalculateRegisterValues();
+	max2871CalculateRegisterValues(&ppl);
+	max2871RegisterInit(&ppl);
+	uint8_t IODIRA = 0x00;
+
+	buffer[0] = 0x00;
+	buffer[1] = IODIRA;
+
+	m24c64WriteNBytes(BASE_ADDR, buffer,
+			FREQ_OUT_ADDR + FREQ_OUT_SIZE + LACT_SIZE, MCPADR_SIZE);
+	uint8_t IODIRB = 0x01;
+	buffer[0] = 0x00;
+	buffer[1] = IODIRB;
+	m24c64WriteNBytes(BASE_ADDR, buffer,
+			FREQ_OUT_ADDR + FREQ_OUT_SIZE + LACT_SIZE, MCPADR_SIZE);
 
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
+
+
 		/* USER CODE END WHILE */
-		test[0] = test[0] + 1;
 		/* USER CODE BEGIN 3 */
 	}
 	/* USER CODE END 3 */

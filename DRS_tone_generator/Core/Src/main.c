@@ -22,7 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "i2c1_master.h"
-//#include "max2871.h"
+#include "max2871.h"
 #include "m24c64.h"
 /* USER CODE END Includes */
 
@@ -130,7 +130,7 @@ uint8_t addrList[5] = { 0 };
  */
 int main(void) {
 	/* USER CODE BEGIN 1 */
-	//MAX2871_t ppl;
+	MAX2871_t ppl;
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -157,25 +157,23 @@ int main(void) {
 	MX_CRC_Init();
 	/* USER CODE BEGIN 2 */
 	i2c1MasterInit();
-	//max2871Init(&ppl);
+	max2871Init(&ppl);
 	uint8_t addrList[5] = { 0 };
-	/*
-	 uint8_t freq_init[FREQ_OUT_SIZE] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
-	 0x77, 0x88 };
 
-	 m24c64WriteNBytes(BASE_ADDR, freq_init, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
-	 uint8_t buffer[10] = { 0 };
+	uint8_t freq_init[FREQ_OUT_SIZE] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
+			0x77, 0x88 };
 
-	 m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
 
-	 for (int i = FREQ_OUT_SIZE - 1; i >= 0; i--)
+	m24c64WriteNBytes(BASE_ADDR, freq_init, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
+	uint8_t buffer[10] = { 0 };
 
-<<<<<<< HEAD
+	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
+
 	for (int i = FREQ_OUT_SIZE - 1; i >= 0; i--)
 		ppl.FreqOut |= (buffer[i] << (i * 8));
 
 	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR + FREQ_OUT_SIZE,
-	LACT_SIZE);
+			LACT_SIZE);
 	ppl.LACT = buffer[0] + buffer[1] / 2.0;
 
 	if (ppl.FreqOut == -1) {
@@ -185,41 +183,12 @@ int main(void) {
 
 	HAL_Delay(200);
 	max2871CalculateRegisterValues(&ppl);
+
 	max2871RegisterInit(&ppl);
 	uint8_t IODIRA = 0x00;
 
 	buffer[0] = 0x00;
 	buffer[1] = IODIRA;
-
-	m24c64WriteNBytes(BASE_ADDR, buffer,
-			FREQ_OUT_ADDR + FREQ_OUT_SIZE + LACT_SIZE, MCPADR_SIZE);
-	uint8_t IODIRB = 0x01;
-	buffer[0] = 0x00;
-	buffer[1] = IODIRB;
-	m24c64WriteNBytes(BASE_ADDR, buffer,
-			FREQ_OUT_ADDR + FREQ_OUT_SIZE + LACT_SIZE, MCPADR_SIZE);
-=======
-	 m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR + FREQ_OUT_SIZE,
-	 LACT_SIZE);
-	 ppl.LACT = buffer[0] + buffer[1] / 2.0;
-
-	 if (ppl.FreqOUT == -1) {
-	 ppl.FreqOUT = 4000000000;
-	 ppl.LACT = 12;
-	 }
->>>>>>> origin/Suma
-
-	 HAL_Delay(200);
-	 CalculateRegisterValues();
-	 */
-	HAL_Delay(200);
-	max2871CalculateRegisterValues(&ppl);
-	max2871RegisterInit(&ppl);
-	uint8_t IODIRA = 0x00;
-
-	buffer[0] = 0x00;
-	buffer[1] = IODIRA;
-
 	m24c64WriteNBytes(BASE_ADDR, buffer,
 			FREQ_OUT_ADDR + FREQ_OUT_SIZE + LACT_SIZE, MCPADR_SIZE);
 	uint8_t IODIRB = 0x01;
@@ -246,12 +215,8 @@ int main(void) {
 	sumaptr = &Suma;
 
 	while (1) {
-<<<<<<< HEAD
-
-
 		/* USER CODE END WHILE */
 		/* USER CODE BEGIN 3 */
-=======
 		Valor_0 = HAL_GPIO_ReadPin(GPIOB, SW_0_Pin) ? 0 : 12.5;
 		Valor_1 = HAL_GPIO_ReadPin(GPIOA, SW_1_Pin) ? 0 : 25;
 		Valor_2 = HAL_GPIO_ReadPin(GPIOC, SW_2_Pin) ? 0 : 50;
@@ -265,8 +230,9 @@ int main(void) {
 
 		Suma = (Valor_0) + (Valor_1) + (Valor_2) + (Valor_3) + (Valor_4)
 				+ (Valor_5) + (Valor_6) + (Valor_7) + (Valor_8) + (Valor_9);
->>>>>>> origin/Suma
 	}
+
+	max2871Program(&ppl);
 	/* USER CODE END WHILE */
 	/* USER CODE BEGIN 3 */
 	/* USER CODE END 3 */

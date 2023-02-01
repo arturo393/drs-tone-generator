@@ -120,7 +120,10 @@ unsigned long RE_time1 = 0;
 unsigned long RE_time2 = 0;
 
 const int EEPROM_ADR = 0x50;
-float *sumaptr;
+unsigned long *sumaptr;
+unsigned long *muxptr;
+
+MAX2871_t *ppl_ptr;
 uint8_t addrList[5] = { 0 };
 /* USER CODE END 0 */
 
@@ -131,6 +134,9 @@ uint8_t addrList[5] = { 0 };
 int main(void) {
 	/* USER CODE BEGIN 1 */
 	MAX2871_t ppl;
+	ppl.FreqOUTold = 0;
+	ppl_ptr = &ppl;
+	ppl_ptr->ATTBYTE = 0;
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -151,7 +157,7 @@ int main(void) {
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-//	MX_I2C1_Init();
+	MX_I2C1_Init();
 	MX_SPI2_Init();
 	MX_USART1_UART_Init();
 	MX_CRC_Init();
@@ -159,11 +165,8 @@ int main(void) {
 	i2c1MasterInit();
 	max2871Init(&ppl);
 	uint8_t addrList[5] = { 0 };
-
 	uint8_t freq_init[FREQ_OUT_SIZE] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
 			0x77, 0x88 };
-
-
 	m24c64WriteNBytes(BASE_ADDR, freq_init, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
 	uint8_t buffer[10] = { 0 };
 
@@ -173,7 +176,7 @@ int main(void) {
 		ppl.FreqOut |= (buffer[i] << (i * 8));
 
 	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR + FREQ_OUT_SIZE,
-			LACT_SIZE);
+	LACT_SIZE);
 	ppl.LACT = buffer[0] + buffer[1] / 2.0;
 
 	if (ppl.FreqOut == -1) {
@@ -184,7 +187,7 @@ int main(void) {
 	HAL_Delay(200);
 	max2871CalculateRegisterValues(&ppl);
 
-	max2871RegisterInit(&ppl);
+	max2871RegisterInit(&hspi2, &ppl);
 	uint8_t IODIRA = 0x00;
 
 	buffer[0] = 0x00;
@@ -197,11 +200,44 @@ int main(void) {
 	m24c64WriteNBytes(BASE_ADDR, buffer,
 			FREQ_OUT_ADDR + FREQ_OUT_SIZE + LACT_SIZE, MCPADR_SIZE);
 
+	// ATTENUATION NEEDED FOR LMAX OUTPUT - CHECK THAT
+	// no se que es esto
+	AC[0] = 19; //  100 MHz
+	AC[1] = 19; //  300 MHz
+	AC[2] = 20; //  500 MHz
+	AC[3] = 18.5; //  700 MHz
+	AC[4] = 18.5; //  900 MHz
+	AC[5] = 18.5; // 1100 MHz
+	AC[6] = 18.5; // 1300 MHz
+	AC[7] = 17; // 1500 MHz
+	AC[8] = 17; // 1700 MHz
+	AC[9] = 16.5; // 1900 MHz
+	AC[10] = 16; // 2100 MHz
+	AC[11] = 15; // 2300 MHz
+	AC[12] = 13; // 2500 MHz
+	AC[13] = 13; // 2700 MHz
+	AC[14] = 11; // 2900 MHz
+	AC[15] = 9.5; // 3100 MHz
+	AC[16] = 10; // 3300 MHz
+	AC[17] = 9; // 3500 MHz
+	AC[18] = 8.5; // 3700 MHz
+	AC[19] = 7; // 3900 MHz
+	AC[20] = 6; // 4100 MHz
+	AC[21] = 4; //4300 MHz
+	AC[22] = 5.5; //4500 MHz
+	AC[23] = 5;  //4700 MHz
+	AC[24] = 2;  //4900 MHz
+	AC[25] = 0;  //5100 MHz
+	AC[26] = 0;  //5300 MHz
+	AC[27] = 0;  //5500 MHz
+	AC[28] = 0;  //5700 MHz
+	AC[29] = 0;  //5900 MHz
+	AC[30] = 0;  //6100 MHz
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-	float Valor_0;
+	int Valor_0;
 	int Valor_1;
 	int Valor_2;
 	int Valor_3;
@@ -211,28 +247,62 @@ int main(void) {
 	int Valor_7;
 	int Valor_8;
 	int Valor_9;
-	float Suma;
-	sumaptr = &Suma;
-
+	unsigned long suma_current = -1;
+	unsigned long suma_read;
+	unsigned long suma_new = 0;
+	unsigned long mux;
+	muxptr = &mux;
+	unsigned long FreqBase = 150000000;
+	ppl.FreqOut = suma_read + FreqBase;
+	unsigned long ultima_suma = HAL_GetTick();
+	unsigned long togg = HAL_GetTick();
+	int toggtime;
 	while (1) {
 		/* USER CODE END WHILE */
-		/* USER CODE BEGIN 3 */
-		Valor_0 = HAL_GPIO_ReadPin(GPIOB, SW_0_Pin) ? 0 : 12.5;
-		Valor_1 = HAL_GPIO_ReadPin(GPIOA, SW_1_Pin) ? 0 : 25;
-		Valor_2 = HAL_GPIO_ReadPin(GPIOC, SW_2_Pin) ? 0 : 50;
-		Valor_3 = HAL_GPIO_ReadPin(GPIOA, SW_3_Pin) ? 0 : 100;
-		Valor_4 = HAL_GPIO_ReadPin(GPIOA, SW_4_Pin) ? 0 : 200;
-		Valor_5 = HAL_GPIO_ReadPin(GPIOA, SW_5_Pin) ? 0 : 400;
-		Valor_6 = HAL_GPIO_ReadPin(GPIOB, SW_6_Pin) ? 0 : 800;
-		Valor_7 = HAL_GPIO_ReadPin(GPIOB, SW_7_Pin) ? 0 : 1600;
-		Valor_8 = HAL_GPIO_ReadPin(GPIOB, SW_8_Pin) ? 0 : 3200;
-		Valor_9 = HAL_GPIO_ReadPin(GPIOB, SW_9_Pin) ? 0 : 6400;
 
-		Suma = (Valor_0) + (Valor_1) + (Valor_2) + (Valor_3) + (Valor_4)
+		/* USER CODE BEGIN 3 */
+
+		//toggtime=HAL_GetTick()-togg;
+		HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
+		//if ((HAL_GetTick() - togg) > 1000) {
+
+			//HAL_GPIO_TogglePin(MAX_RF_ENABLE_GPIO_Port, MAX_RF_ENABLE_Pin);
+			//togg = HAL_GetTick();
+		//}
+
+		Valor_0 = HAL_GPIO_ReadPin(SW_0_GPIO_Port, SW_0_Pin) ? 0 : 12500;
+		Valor_1 = HAL_GPIO_ReadPin(SW_1_GPIO_Port, SW_1_Pin) ? 0 : 25000;
+		Valor_2 = HAL_GPIO_ReadPin(SW_2_GPIO_Port, SW_2_Pin) ? 0 : 50000;
+		Valor_3 = HAL_GPIO_ReadPin(SW_3_GPIO_Port, SW_3_Pin) ? 0 : 100000;
+		Valor_4 = HAL_GPIO_ReadPin(SW_4_GPIO_Port, SW_4_Pin) ? 0 : 200000;
+		Valor_5 = HAL_GPIO_ReadPin(SW_5_GPIO_Port, SW_5_Pin) ? 0 : 400000;
+		Valor_6 = HAL_GPIO_ReadPin(SW_6_GPIO_Port, SW_6_Pin) ? 0 : 800000;
+		Valor_7 = HAL_GPIO_ReadPin(SW_7_GPIO_Port, SW_7_Pin) ? 0 : 1600000;
+		Valor_8 = HAL_GPIO_ReadPin(SW_8_GPIO_Port, SW_8_Pin) ? 0 : 3200000;
+		Valor_9 = HAL_GPIO_ReadPin(SW_9_GPIO_Port, SW_9_Pin) ? 0 : 6400000;
+
+		suma_read = (Valor_0) + (Valor_1) + (Valor_2) + (Valor_3) + (Valor_4)
 				+ (Valor_5) + (Valor_6) + (Valor_7) + (Valor_8) + (Valor_9);
+
+		if (suma_read != suma_new) {
+			ultima_suma = HAL_GetTick();
+			suma_new = suma_read;
+		}
+
+		if ((HAL_GetTick() - ultima_suma) > 1000) {
+
+			if (suma_new != suma_current) {
+				ppl.FreqOut = suma_read + FreqBase;
+				max2871Program(&hspi2, &ppl);
+				suma_current = suma_new;
+			}
+		}
+
+		//mux = HAL_GPIO_ReadPin(GPIOA, MAX_MUX_Pin);
+		//	max2871Read();
 	}
 
-	max2871Program(&ppl);
+//max2871Read();
 	/* USER CODE END WHILE */
 	/* USER CODE BEGIN 3 */
 	/* USER CODE END 3 */
@@ -484,17 +554,12 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : SW_0_Pin SW_6_Pin SW_8_Pin SW_9_Pin */
-	GPIO_InitStruct.Pin = SW_0_Pin | SW_6_Pin | SW_8_Pin | SW_9_Pin;
+	/*Configure GPIO pins : SW_0_Pin SW_6_Pin SW_7_Pin SW_8_Pin
+	 SW_9_Pin */
+	GPIO_InitStruct.Pin = SW_0_Pin | SW_6_Pin | SW_7_Pin | SW_8_Pin | SW_9_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	/*Configure GPIO pin : SW_7_Pin */
-	GPIO_InitStruct.Pin = SW_7_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(SW_7_GPIO_Port, &GPIO_InitStruct);
 
 }
 

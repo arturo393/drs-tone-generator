@@ -1,5 +1,8 @@
-
-../Core/Src/max2871.c:11:6:max2871Init	24	static
-../Core/Src/max2871.c:53:6:max2871GpioInit	8	static
-../Core/Src/max2871.c:57:6:max2871Write	16	static
-../Core/Src/max2871.c:73:6:shiftOut	24	static
+../Core/Src/max2871.c:10:6:max2871Init	16	static
+../Core/Src/max2871.c:35:6:max2871GpioInit	8	static
+../Core/Src/max2871.c:39:6:max2871Read	24	static
+../Core/Src/max2871.c:78:6:max2871Write	32	static
+../Core/Src/max2871.c:102:6:shiftOut	32	static
+../Core/Src/max2871.c:138:6:max2871CalculateRegisterValues	128	static
+../Core/Src/max2871.c:185:15:max2871RegisterInit	24	static
+../Core/Src/max2871.c:227:6:max2871Program	24	static

@@ -176,7 +176,7 @@ int main(void) {
 		ppl.FreqOut |= (buffer[i] << (i * 8));
 
 	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR + FREQ_OUT_SIZE,
-	LACT_SIZE);
+			LACT_SIZE);
 	ppl.LACT = buffer[0] + buffer[1] / 2.0;
 
 	if (ppl.FreqOut == -1) {
@@ -202,7 +202,7 @@ int main(void) {
 
 	// ATTENUATION NEEDED FOR LMAX OUTPUT - CHECK THAT
 	// no se que es esto
-	AC[0] = 19; //  100 MHz
+	/*AC[0] = 19; //  100 MHz
 	AC[1] = 19; //  300 MHz
 	AC[2] = 20; //  500 MHz
 	AC[3] = 18.5; //  700 MHz
@@ -232,7 +232,7 @@ int main(void) {
 	AC[27] = 0;  //5500 MHz
 	AC[28] = 0;  //5700 MHz
 	AC[29] = 0;  //5900 MHz
-	AC[30] = 0;  //6100 MHz
+	AC[30] = 0;  //6100 MHz*/
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -247,28 +247,34 @@ int main(void) {
 	int Valor_7;
 	int Valor_8;
 	int Valor_9;
+	int toggtime;
 	unsigned long suma_current = -1;
 	unsigned long suma_read;
 	unsigned long suma_new = 0;
 	unsigned long mux;
-	muxptr = &mux;
-	unsigned long FreqBase = 150000000;
-	ppl.FreqOut = suma_read + FreqBase;
 	unsigned long ultima_suma = HAL_GetTick();
 	unsigned long togg = HAL_GetTick();
-	int toggtime;
-	while (1) {
-		/* USER CODE END WHILE */
+	unsigned long FreqBase = 149687510;
+	muxptr = &mux;
+	//ppl.FreqOut = FreqBase; //+ suma_read;
 
-		/* USER CODE BEGIN 3 */
+	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 
-		//toggtime=HAL_GetTick()-togg;
-		HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
-		//if ((HAL_GetTick() - togg) > 1000) {
+	ppl.FreqOut = FreqBase;
+	max2871Program(&hspi2, &ppl);
 
-			//HAL_GPIO_TogglePin(MAX_RF_ENABLE_GPIO_Port, MAX_RF_ENABLE_Pin);
-			//togg = HAL_GetTick();
-		//}
+	//while (1) {
+	/* USER CODE END WHILE */
+	/* USER CODE BEGIN 3 */
+
+	/*if ((HAL_GetTick() - togg) > 1000) {
+          HAL_GPIO_TogglePin(MAX_RF_ENABLE_GPIO_Port, MAX_RF_ENABLE_Pin);
+		  togg = HAL_GetTick();
+		}
+
+		//ppl.FreqOut = FreqBase;
+		//max2871Program(&hspi2, &ppl);
+		//HAL_Delay(5000);
 
 		Valor_0 = HAL_GPIO_ReadPin(SW_0_GPIO_Port, SW_0_Pin) ? 0 : 12500;
 		Valor_1 = HAL_GPIO_ReadPin(SW_1_GPIO_Port, SW_1_Pin) ? 0 : 25000;
@@ -282,7 +288,7 @@ int main(void) {
 		Valor_9 = HAL_GPIO_ReadPin(SW_9_GPIO_Port, SW_9_Pin) ? 0 : 6400000;
 
 		suma_read = (Valor_0) + (Valor_1) + (Valor_2) + (Valor_3) + (Valor_4)
-				+ (Valor_5) + (Valor_6) + (Valor_7) + (Valor_8) + (Valor_9);
+								+ (Valor_5) + (Valor_6) + (Valor_7) + (Valor_8) + (Valor_9);
 
 		if (suma_read != suma_new) {
 			ultima_suma = HAL_GetTick();
@@ -290,19 +296,18 @@ int main(void) {
 		}
 
 		if ((HAL_GetTick() - ultima_suma) > 1000) {
-
 			if (suma_new != suma_current) {
 				ppl.FreqOut = suma_read + FreqBase;
 				max2871Program(&hspi2, &ppl);
 				suma_current = suma_new;
 			}
 		}
-
 		//mux = HAL_GPIO_ReadPin(GPIOA, MAX_MUX_Pin);
-		//	max2871Read();
-	}
+		//max2871Read();
+	}	//termino del while
 
-//max2871Read();
+	//max2871Read();
+
 	/* USER CODE END WHILE */
 	/* USER CODE BEGIN 3 */
 	/* USER CODE END 3 */
@@ -521,7 +526,7 @@ static void MX_GPIO_Init(void) {
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOA,
-	MAX_LE_Pin | MAX_CE_Pin | MAX_MUX_Pin | MAX_RF_ENABLE_Pin | LED_1_Pin,
+			MAX_LE_Pin | MAX_CE_Pin | MAX_MUX_Pin | MAX_RF_ENABLE_Pin | LED_1_Pin,
 			GPIO_PIN_RESET);
 
 	/*Configure GPIO pins : RS485_CTRL_Pin LED_2_Pin LED_3_Pin */
@@ -582,17 +587,17 @@ void Error_Handler(void) {
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
+	/* USER CODE BEGIN 6 */
+	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
+	/* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

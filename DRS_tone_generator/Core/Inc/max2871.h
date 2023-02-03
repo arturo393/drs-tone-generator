@@ -59,7 +59,7 @@
 // VCO maual selction: unused
 #define VAS_SHDN  0x0UL
 //VAS enabled
-#define VAS_TEMP  0x1UL
+#define RETUNE  0x1UL
 //VAS temperature compensation enabled
 #define CSM  0x0UL
 //Cycle slip mode disabled
@@ -83,7 +83,7 @@
 #define FB  0x1UL
 //VCO to N counter mode is NOT divided
 
-#define BS  0x30FFUL
+#define BS  0x30FFUL   //ORIGINALMENTE 30FF
 //shoud be choosen so that fPFD/BS  50kH or less
 #define SDVCO  0x0UL
 //VCO enabled

@@ -213,6 +213,7 @@ int main(void) {
 	int Valor_9;
 	float Suma;
 	sumaptr = &Suma;
+	ppl.FreqOut = 4000000000; // 4 [GHz]
 
 	while (1) {
 		/* USER CODE END WHILE */
@@ -230,9 +231,10 @@ int main(void) {
 
 		Suma = (Valor_0) + (Valor_1) + (Valor_2) + (Valor_3) + (Valor_4)
 				+ (Valor_5) + (Valor_6) + (Valor_7) + (Valor_8) + (Valor_9);
+		max2871Program(&ppl);
+		ppl.FreqOut += Suma;
 	}
 
-	max2871Program(&ppl);
 	/* USER CODE END WHILE */
 	/* USER CODE BEGIN 3 */
 	/* USER CODE END 3 */

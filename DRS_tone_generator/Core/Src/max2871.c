@@ -19,10 +19,33 @@ void max2871Init(MAX2871_t *ppl) {
 	ppl->ATT = 0.0;
 	ppl->CAL = 0.0;
 	ppl->DIVA = 0x0UL;
+
 	ppl->register0.INT = 0x0UL; //Enables fractional-N mode
 	ppl->register0.NDIV = 0x0UL;
 	ppl->register0.FRAC = 0x0UL;
 	ppl->register0.ADDR0 = 0x0UL;
+
+	ppl->register1.CPL = 0x3UL; //Charge pump liniarity 30%
+	ppl->register1.CPT = 0x00UL; //Charge pump test mode  normal mode
+	ppl->register1.PHASE = 0x1UL; //Phase Value (recomened)
+	ppl->register1.MODULUS = 0xFA0UL; //4000 for max resolution
+	ppl->register1.ADDR1  =   0x1UL;
+
+	ppl->register2.LDS = 0x1UL; 	// 1 if fPFD > 32 MHz
+	ppl->register2.SDN = 0x0UL; 	//noise mode  Low-noise mode
+	ppl->register2.MUX = 0x6UL;		//MUX pin configuration  Digital lock detect
+	ppl->register2.DBR = 0x0UL; 	//reference doubler is disabled
+	ppl->register2.RDIV2 = 0x0UL; 	//reference divide-by-2 is disabled
+	ppl->register2.RCNT = 0x0UL; 	// reference divide Value is unused
+	ppl->register2.REG4DB = 0x0UL; 	//double buffer mode disabled
+	ppl->register2.CP = 0x00UL; 	//charge pump current  0.32 mA (1.36/RSET * (1 + CP[3:0]) RSET  5k1)
+	ppl->register2.LDF = 0x0UL;		// lock dtect function  Frac-N lock detect
+	ppl->register2.LDP = 0x0UL;  	// lock detect precision  10ns
+	ppl->register2.PDP = 0x1UL; 	//phase detector polarity set poitive
+	ppl->register2.SHDN = 0x0UL;
+	ppl->register2.TRI = 0x0UL;
+	ppl->register2.RST = 0x0UL;
+	ppl->register2.ADDR2 = 0x2UL;
 
 	ppl->MCPADR = 0x27;
 	ppl->ATTREGADR = 0x12; // ATTENUATOR, MCP REG A
@@ -40,12 +63,14 @@ void max2871Write(unsigned long data)
 {
 
 	LE_LOW();
-
+	uint32_t val = (data & 0xFF000000) >> 24;
 	shiftOut(MAX_DATA_Pin, MAX_SCK_Pin, 1, ((data & 0xFF000000) >> 24));
 	shiftOut(MAX_DATA_Pin, MAX_SCK_Pin, 1, ((data & 0x00FF0000) >> 16));
+	val = (data & 0x00FF0000) >> 16;
 	shiftOut(MAX_DATA_Pin, MAX_SCK_Pin, 1, ((data & 0x0000FF00) >> 8));
+	val = (data & 0x0000FF00) >> 8;
 	shiftOut(MAX_DATA_Pin, MAX_SCK_Pin, 1, (data & 0x000000FF));
-
+	val = (data & 0x000000FF);
 	LE_HIGH();
 	HAL_Delay(50);
 
@@ -119,7 +144,7 @@ unsigned long max2871RegisterInit(MAX2871_t *ppl) {
 
 	for (int i = 0; i < 2; i++) {
 		composedRegisterValue = VAS_DLY << 29| SDPLL << 25 | F01 << 24
-		| LD << 22 | MUX << 18 | ADCS << 6 | ADCM << 3 | ADDR5;
+		| LD << 22 | ppl->register2.MUX << 18 | ADCS << 6 | ADCM << 3 | ADDR5;
 
 		max2871Write(composedRegisterValue);
 		HAL_Delay(20);
@@ -139,13 +164,13 @@ unsigned long max2871RegisterInit(MAX2871_t *ppl) {
 		max2871Write(composedRegisterValue);
 
 		composedRegisterValue =
-		LDS << 31| SDN << 29 | MUX << 26 | DBR << 25
+		ppl->register2.LDS << 31| SDN << 29 | MUX << 26 | DBR << 25
 		| RDIV2 << 24 | RCNT << 14 | REG4DB << 13 | CP << 9 | LDF << 8
 		| LDP << 7 | PDP << 6 | SHDN << 5 | TRI << 4 | RST << 3 | ADDR2;
 
 		max2871Write(composedRegisterValue);
-		composedRegisterValue = CPL << 29| CPT << 27 | PHASE << 15
-		| MODULUS << 3 | ADDR1;
+		composedRegisterValue = ppl->register1.CPL << 29| ppl->register1.CPT << 27 | ppl->register1.PHASE << 15
+		| ppl->register1.MODULUS << 3 | ppl->register1.ADDR1;
 
 		max2871Write(composedRegisterValue);
 

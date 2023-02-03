@@ -9,6 +9,7 @@
 #define INC_MAX2871_H_
 
 #include "main.h"
+#include "stdbool.h"
 
 #define LE_LOW()  CLEAR_BIT(GPIOA->ODR, GPIO_ODR_OD1)
 #define LE_HIGH() SET_BIT(GPIOA->ODR, GPIO_ODR_OD1)
@@ -24,7 +25,7 @@
 // VCO maual selction: unused
 #define VAS_SHDN  0x0UL
 //VAS enabled
-#define VAS_TEMP  0x1UL
+#define RETUNE  0x1UL
 //VAS temperature compensation enabled
 #define CSM  0x0UL
 //Cycle slip mode disabled
@@ -48,7 +49,7 @@
 #define FB  0x1UL
 //VCO to N counter mode is NOT divided
 
-#define BS  0x30FFUL
+#define BS  0x30FFUL   //ORIGINALMENTE 30FF
 //shoud be choosen so that fPFD/BS  50kH or less
 #define SDVCO  0x0UL
 //VCO enabled
@@ -153,11 +154,13 @@ typedef struct MAX2871 {
 } MAX2871_t;
 
 void max2871Init();
-void max2871Write(unsigned long data);
-void shiftOut(uint32_t DATAPIN, uint32_t CLOCKPIN, uint32_t MSBFIRST,
-		uint32_t data);
+//void max2871Write(unsigned long data);
+void shiftOut(uint16_t, uint16_t, bool MSBFIRST, uint8_t data);
 void max2871CalculateRegisterValues(MAX2871_t *ppl); //calculates values of NDIV, FRAC & DIVA
-unsigned long max2871RegisterInit(MAX2871_t *ppl);
-void max2871Program(MAX2871_t *ppl);
-void shiftOut(uint32_t DATAPIN, uint32_t CLOCKPIN, uint32_t, uint32_t data);
+//unsigned long max2871RegisterInit(MAX2871_t *ppl);
+unsigned long max2871RegisterInit(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl);
+//void max2871Program(MAX2871_t *ppl);
+void max2871Read();
+void max2871Write(SPI_HandleTypeDef *hspi2, unsigned long data);
+void max2871Program(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl);
 #endif /* INC_MAX2871_H_ */

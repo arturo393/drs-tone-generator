@@ -6,6 +6,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Core/Src/i2c1_master.c \
+../Core/Src/led.c \
 ../Core/Src/m24c64.c \
 ../Core/Src/main.c \
 ../Core/Src/max2871.c \
@@ -17,6 +18,7 @@ C_SRCS += \
 
 OBJS += \
 ./Core/Src/i2c1_master.o \
+./Core/Src/led.o \
 ./Core/Src/m24c64.o \
 ./Core/Src/main.o \
 ./Core/Src/max2871.o \
@@ -28,6 +30,7 @@ OBJS += \
 
 C_DEPS += \
 ./Core/Src/i2c1_master.d \
+./Core/Src/led.d \
 ./Core/Src/m24c64.d \
 ./Core/Src/main.d \
 ./Core/Src/max2871.d \
@@ -45,7 +48,7 @@ Core/Src/%.o Core/Src/%.su: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/i2c1_master.d ./Core/Src/i2c1_master.o ./Core/Src/i2c1_master.su ./Core/Src/m24c64.d ./Core/Src/m24c64.o ./Core/Src/m24c64.su ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/max2871.d ./Core/Src/max2871.o ./Core/Src/max2871.su ./Core/Src/stm32g0xx_hal_msp.d ./Core/Src/stm32g0xx_hal_msp.o ./Core/Src/stm32g0xx_hal_msp.su ./Core/Src/stm32g0xx_it.d ./Core/Src/stm32g0xx_it.o ./Core/Src/stm32g0xx_it.su ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32g0xx.d ./Core/Src/system_stm32g0xx.o ./Core/Src/system_stm32g0xx.su
+	-$(RM) ./Core/Src/i2c1_master.d ./Core/Src/i2c1_master.o ./Core/Src/i2c1_master.su ./Core/Src/led.d ./Core/Src/led.o ./Core/Src/led.su ./Core/Src/m24c64.d ./Core/Src/m24c64.o ./Core/Src/m24c64.su ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/max2871.d ./Core/Src/max2871.o ./Core/Src/max2871.su ./Core/Src/stm32g0xx_hal_msp.d ./Core/Src/stm32g0xx_hal_msp.o ./Core/Src/stm32g0xx_hal_msp.su ./Core/Src/stm32g0xx_it.d ./Core/Src/stm32g0xx_it.o ./Core/Src/stm32g0xx_it.su ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32g0xx.d ./Core/Src/system_stm32g0xx.o ./Core/Src/system_stm32g0xx.su
 
 .PHONY: clean-Core-2f-Src
 

@@ -24,6 +24,7 @@
 #include "i2c1_master.h"
 #include "max2871.h"
 #include "m24c64.h"
+#include "led.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -67,21 +68,6 @@ static void MX_CRC_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-// PINS MAX2871
-/*
- #define CLOCKPIN A0
- #define DATAPIN A1
- #define LE A2
- #define CE A3
- */
-
-float AC[56];
-float EEPROM_float;
-
-const int EEPROM_ADR = 0x50;
-unsigned long *sumaptr;
-unsigned long *muxptr;
-
 MAX2871_t *ppl_ptr;
 uint8_t addrList[5] = { 0 };
 /* USER CODE END 0 */
@@ -96,6 +82,7 @@ int main(void) {
 	ppl.FreqOUTold = 0;
 	ppl_ptr = &ppl;
 	ppl_ptr->ATTBYTE = 0;
+	LED_t led;
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -122,6 +109,7 @@ int main(void) {
 	MX_CRC_Init();
 	/* USER CODE BEGIN 2 */
 	i2c1MasterInit();
+	led_init(&led);
 	max2871Init(&ppl);
 	uint8_t addrList[5] = { 0 };
 	uint8_t freq_init[FREQ_OUT_SIZE] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
@@ -162,6 +150,7 @@ int main(void) {
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
+
 	int Valor_0;
 	int Valor_1;
 	int Valor_2;
@@ -175,16 +164,16 @@ int main(void) {
 	unsigned long suma_current = -1;
 	unsigned long suma_read;
 	unsigned long suma_new = 0;
-	unsigned long mux;
 	unsigned long ultima_suma = HAL_GetTick();
 	unsigned long FreqBase = 149500000;
-	muxptr = &mux;
 
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 
 	while (1) {
 	/* USER CODE END WHILE */
 	/* USER CODE BEGIN 3 */
+
+		led_enable_kalive(&led);
 
 		Valor_0 = HAL_GPIO_ReadPin(SW_0_GPIO_Port, SW_0_Pin) ? 0 : 12500;
 		Valor_1 = HAL_GPIO_ReadPin(SW_1_GPIO_Port, SW_1_Pin) ? 0 : 25000;
@@ -201,24 +190,26 @@ int main(void) {
 								+ (Valor_5) + (Valor_6) + (Valor_7) + (Valor_8) + (Valor_9);
 
 		if (suma_read != suma_new) {
+			suma_end_off();
 			ultima_suma = HAL_GetTick();
 			HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
+			suma_changing_on();
 			suma_new = suma_read;
 		}
 
-		if ((HAL_GetTick() - ultima_suma) > 1000) {
+		if ((HAL_GetTick() - ultima_suma) > 100) {
 			if (suma_new != suma_current) {
 				ppl.FreqOut = suma_read + FreqBase;
 				max2871Program(&hspi2, &ppl);
 				HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
+				suma_changing_off();
+				suma_end_on();
 				suma_current = suma_new;
 			}
 		}
-		//mux = HAL_GPIO_ReadPin(GPIOA, MAX_MUX_Pin);
-		//max2871Read();
-	}   //termino del while
-
+	} // While End
 	/* USER CODE END WHILE */
+
 	/* USER CODE BEGIN 3 */
 	/* USER CODE END 3 */
 }

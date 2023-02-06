@@ -20,7 +20,7 @@
 #define CPL  0x3UL //Charge pump liniarity 30%
 #define CPT  0x00UL //Charge pump test mode  normal mode
 #define PHASE  0x1UL //Phase Value (recomened)
-#define MODULUS  0xFA0UL //4000 for max resolution
+#define MODULUS  0xFA0UL //4000 (FA0) for max resolution
 #define ADDR1  0x1UL
 
 //Register 2
@@ -130,13 +130,13 @@ typedef struct REGISTER0 {
 	unsigned long ADDR0;
 } REGISTER0_t;
 
-typedef struct REGISTER1 {
+/*typedef struct REGISTER1 {                                       CAMBIADO
 	//Register 0
 	unsigned long INT; //Enables fractional-N mode
 	unsigned long NDIV;
 	unsigned long FRAC;
 	unsigned long ADDR0;
-} REGISTER1_t;
+} REGISTER1_t; */
 
 typedef struct MAX2871 {
 	unsigned long long FreqOut;

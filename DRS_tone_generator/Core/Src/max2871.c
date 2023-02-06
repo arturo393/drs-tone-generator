@@ -80,7 +80,7 @@ void max2871Write(SPI_HandleTypeDef *hspi2, unsigned long data)
 {
     uint8_t buffer[4]={0};
 
-    buffer[0] = (data & 0xFF000000) >> 24; //ORIGINAL OJO
+    buffer[0] = (data & 0xFF000000) >> 24;
     buffer[1] = (data & 0x00FF0000) >> 16;
     buffer[2] = (data & 0x0000FF00) >> 8;
     buffer[3] = (data & 0x000000FF);
@@ -138,8 +138,8 @@ void max2871Write(SPI_HandleTypeDef *hspi2, unsigned long data)
 void max2871CalculateRegisterValues(MAX2871_t *ppl) //calculates values of NDIV, FRAC & DIVA
 {
 	double rest;
-	unsigned long FREQREF = 10000000.0;  //REF GENERADOR X 5
-	unsigned long RESOL = 800.0;        // RESOL = FREQREF/12500
+	unsigned long FREQREF = 50000000.0;  //REF GENERADOR X 5
+	unsigned long RESOL = 4000.0;
 	if (ppl->FreqOut >= 3000000000) {
 		ppl->DIVA = 0;
 		ppl->register0.NDIV = ppl->FreqOut / FREQREF;
@@ -188,15 +188,15 @@ unsigned long max2871RegisterInit(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) {
 	unsigned long composedRegisterValue;
 
 	for (int i = 0; i < 2; i++) {
-		composedRegisterValue = VAS_DLY << 29| SDPLL << 25 | F01 << 24 //Reserva los espacios necesarios para cada variable
-		| LD << 22 | MUX << 18 | ADCS << 6 | ADCM << 3 | ADDR5;        //ADDR5 (direccion) = 3 bits, ADCM (modo del ADC) = 3 bits, SDPLL (setea el PLL a modo shutdown) = 1 bit
-                                                                       //ADCS (inicia el ADC) = 1 bit, MUX (setea el modo del pin MUX) = 1 bit, VAS_DLY (Delay para el VCO) = 2 bits
-		max2871Write(hspi2, composedRegisterValue);                    //LD (setea la funcion deteccion de bloqueo) = 2 bits, F01 (setea la forma de los enteros para F) = 1 bit
+		composedRegisterValue = VAS_DLY << 29| SDPLL << 25 | F01 << 24
+		| LD << 22 | MUX_MSB << 18 | ADCS << 6 | ADCM << 3 | ADDR5;
+
+		max2871Write(hspi2, composedRegisterValue);
 		HAL_Delay(20);
 
-		composedRegisterValue = RES << 29| SDLDO << 28 | SDDIV << 27        //SDLDO (setea a shutdown el VCO LDO) = 1 bit, SDDIV (setea a shutdown el VCO Divider) = 1 bit
-		| SDREF << 26 | FB << 23 | ppl->DIVA << 20 | BS << 12 | SDVCO << 11 //SDREF (setea a shutdown la referencia de entrada) = 1 bit, FB (setea el VCO a modo feedback) = 1 bit
-		| MTLD << 10 | BDIV << 9 | RFB_EN << 8 | BPWR << 6 | RFA_EN << 5    //DIVA (divide por x la referencia de salida segun se programe) = 3 bits, SDVCO (pone el VCO en modo shutdown) =1 bit
+		composedRegisterValue = RES << 29| SDLDO << 28 | SDDIV << 27
+		| SDREF << 26 | FB << 23 | ppl->DIVA << 20 | BS << 12 | SDVCO << 11
+		| MTLD << 10 | BDIV << 9 | RFB_EN << 8 | BPWR << 6 | RFA_EN << 5
 		| APWR << 3 | ADDR4;
 
 		max2871Write(hspi2, composedRegisterValue);
@@ -228,7 +228,8 @@ unsigned long max2871RegisterInit(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) {
 void max2871Program(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) // compose register value of register 0 and 4
 {
 
-	unsigned long composedRegisterValue; // = 0;
+	unsigned long composedRegisterValue;
+
 	max2871CalculateRegisterValues(ppl);
 
 	composedRegisterValue = ppl->register0.INT << 31 | ppl->register0.NDIV << 15
@@ -236,7 +237,7 @@ void max2871Program(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) // compose registe
 
 	max2871Write(hspi2, composedRegisterValue);
 
-    HAL_Delay(6000); //new delay
+    HAL_Delay(1300); //new delay
 
 	composedRegisterValue = RES << 29|SDLDO << 28|SDDIV << 27
 	| SDREF << 26|FB << 23|ppl->DIVA << 20|BS << 12

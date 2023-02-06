@@ -78,47 +78,6 @@ static void MX_CRC_Init(void);
 float AC[56];
 float EEPROM_float;
 
-// OLED 128x64 with SH1106 Controller
-// E.G. DM-OLED13-625
-/*
- #define OLED_MOSI  29
- #define OLED_CLK   27
- #define OLED_DC    35
- #define OLED_CS    37
- #define OLED_RESET 31
- Adafruit_SH1106 display(OLED_MOSI,OLED_CLK,OLED_DC,OLED_RESET,OLED_CS);
- */
-/*
- #if (SH1106_LCDHEIGHT != 64)
- #error("Height incorrect, please fix Adafruit_SH1106.h!");
- #endif
-
- unsigned int ActiveDisplay = 1;  // AMPLITUDE
- boolean ShowCursor = true;
- unsigned int CursorPosition = 2;
-
- // Menue Intem to be displayed
- unsigned int MenueItem = 0;
-
- // STATE OF THE ROTARY ENCODER
- const int RE2 = 49;  // PRESSED
- const int RE1 = 47;
- const int RE0 = 45;
- unsigned long StartMilli;
- unsigned long DurationMilli;
- boolean PressedLong = false;
- */
-// "INTERRUPT" VARIABLES
-unsigned int RE_now = 0;
-unsigned int RE_old = 0;
-unsigned int RE_xor = 0;
-unsigned int RE_one = 0;
-unsigned int RE_two = 0;
-unsigned int RE_eval = 0x0;  // 0 = LEFT(-), 1=RIGHT(+), 2=PRESSED
-unsigned long RE_time0 = 0;
-unsigned long RE_time1 = 0;
-unsigned long RE_time2 = 0;
-
 const int EEPROM_ADR = 0x50;
 unsigned long *sumaptr;
 unsigned long *muxptr;
@@ -199,40 +158,6 @@ int main(void) {
 	buffer[1] = IODIRB;
 	m24c64WriteNBytes(BASE_ADDR, buffer,
 			FREQ_OUT_ADDR + FREQ_OUT_SIZE + LACT_SIZE, MCPADR_SIZE);
-
-	// ATTENUATION NEEDED FOR LMAX OUTPUT - CHECK THAT
-	// no se que es esto
-	/*AC[0] = 19; //  100 MHz
-	AC[1] = 19; //  300 MHz
-	AC[2] = 20; //  500 MHz
-	AC[3] = 18.5; //  700 MHz
-	AC[4] = 18.5; //  900 MHz
-	AC[5] = 18.5; // 1100 MHz
-	AC[6] = 18.5; // 1300 MHz
-	AC[7] = 17; // 1500 MHz
-	AC[8] = 17; // 1700 MHz
-	AC[9] = 16.5; // 1900 MHz
-	AC[10] = 16; // 2100 MHz
-	AC[11] = 15; // 2300 MHz
-	AC[12] = 13; // 2500 MHz
-	AC[13] = 13; // 2700 MHz
-	AC[14] = 11; // 2900 MHz
-	AC[15] = 9.5; // 3100 MHz
-	AC[16] = 10; // 3300 MHz
-	AC[17] = 9; // 3500 MHz
-	AC[18] = 8.5; // 3700 MHz
-	AC[19] = 7; // 3900 MHz
-	AC[20] = 6; // 4100 MHz
-	AC[21] = 4; //4300 MHz
-	AC[22] = 5.5; //4500 MHz
-	AC[23] = 5;  //4700 MHz
-	AC[24] = 2;  //4900 MHz
-	AC[25] = 0;  //5100 MHz
-	AC[26] = 0;  //5300 MHz
-	AC[27] = 0;  //5500 MHz
-	AC[28] = 0;  //5700 MHz
-	AC[29] = 0;  //5900 MHz
-	AC[30] = 0;  //6100 MHz*/
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -247,34 +172,19 @@ int main(void) {
 	int Valor_7;
 	int Valor_8;
 	int Valor_9;
-	int toggtime;
 	unsigned long suma_current = -1;
 	unsigned long suma_read;
 	unsigned long suma_new = 0;
 	unsigned long mux;
 	unsigned long ultima_suma = HAL_GetTick();
-	unsigned long togg = HAL_GetTick();
-	unsigned long FreqBase = 149687510;
+	unsigned long FreqBase = 149500000;
 	muxptr = &mux;
-	//ppl.FreqOut = FreqBase; //+ suma_read;
 
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 
-	ppl.FreqOut = FreqBase;
-	max2871Program(&hspi2, &ppl);
-
-	//while (1) {
+	while (1) {
 	/* USER CODE END WHILE */
 	/* USER CODE BEGIN 3 */
-
-	/*if ((HAL_GetTick() - togg) > 1000) {
-          HAL_GPIO_TogglePin(MAX_RF_ENABLE_GPIO_Port, MAX_RF_ENABLE_Pin);
-		  togg = HAL_GetTick();
-		}
-
-		//ppl.FreqOut = FreqBase;
-		//max2871Program(&hspi2, &ppl);
-		//HAL_Delay(5000);
 
 		Valor_0 = HAL_GPIO_ReadPin(SW_0_GPIO_Port, SW_0_Pin) ? 0 : 12500;
 		Valor_1 = HAL_GPIO_ReadPin(SW_1_GPIO_Port, SW_1_Pin) ? 0 : 25000;
@@ -292,6 +202,7 @@ int main(void) {
 
 		if (suma_read != suma_new) {
 			ultima_suma = HAL_GetTick();
+			HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
 			suma_new = suma_read;
 		}
 
@@ -299,14 +210,13 @@ int main(void) {
 			if (suma_new != suma_current) {
 				ppl.FreqOut = suma_read + FreqBase;
 				max2871Program(&hspi2, &ppl);
+				HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 				suma_current = suma_new;
 			}
 		}
 		//mux = HAL_GPIO_ReadPin(GPIOA, MAX_MUX_Pin);
 		//max2871Read();
-	}	//termino del while
-
-	//max2871Read();
+	}   //termino del while
 
 	/* USER CODE END WHILE */
 	/* USER CODE BEGIN 3 */

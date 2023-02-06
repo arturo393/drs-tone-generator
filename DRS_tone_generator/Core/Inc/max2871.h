@@ -16,43 +16,9 @@
 
 //composition of MAX2871 Registers
 
-//Register 1
-#define CPL  0x3UL //Charge pump liniarity 30%
-#define CPT  0x00UL //Charge pump test mode  normal mode
-#define PHASE  0x1UL //Phase Value (recomened)
-#define MODULUS  0xFA0UL //4000 (FA0) for max resolution
-#define ADDR1  0x1UL
 
-//Register 2
-#define LDS  0x1UL
-// 1 if fPFD > 32 MHz
-#define SDN  0x0UL
-//noise mode  Low-noise mode
-#define MUX  0x6UL
-//MUX pin configuration  Digital lock detect
-#define DBR  0x0UL
-//reference doubler is disabled
-#define RDIV2  0x0UL
-//reference divide-by-2 is disabled
-#define RCNT  0x0UL
-// reference divide Value is unused
-#define REG4DB  0x0UL
-//double buffer mode disabled
-#define CP  0x00UL
-//charge pump current  0.32 mA (1.36/RSET * (1 + CP[3:0]) RSET  5k1)
-#define LDF  0x0UL
-// lock dtect function  Frac-N lock detect
-#define LDP  0x0UL
-// lock detect precision  10ns
-#define PDP  0x1UL
-//phase detector polarity set poitive
-#define SHDN  0x0UL
-//power down mode  normal mode
-#define TRI  0x0UL
-//charge pump output high-impedance mode disabled
-#define RST  0x0UL
-// counter reset mode  normal operation
-#define ADDR2  0x2UL
+
+
 
 //Register 3
 #define VCO_MS  0x0UL
@@ -125,18 +91,44 @@
 typedef struct REGISTER0 {
 	//Register 0
 	unsigned long INT; //Enables fractional-N mode
-	unsigned long NDIV;
+	unsigned long NDIV; // Integer part from N-Divider
 	unsigned long FRAC;
 	unsigned long ADDR0;
 } REGISTER0_t;
 
-/*typedef struct REGISTER1 {                                       CAMBIADO
-	//Register 0
-	unsigned long INT; //Enables fractional-N mode
-	unsigned long NDIV;
-	unsigned long FRAC;
-	unsigned long ADDR0;
-} REGISTER1_t; */
+typedef struct REGISTER1 {
+	//Register 1
+
+	unsigned long CPL; //Charge pump liniarity 30%
+	unsigned long CPT; //Charge pump test mode  normal mode
+	unsigned long PHASE; //Phase Value (recomened)
+	unsigned long MODULUS; //4000 for max resolution
+	unsigned long ADDR1;
+} REGISTER1_t;
+
+typedef struct REGISTER2 {
+	//Register 2
+
+	//Register 2
+	unsigned long LDS;
+	unsigned long SDN;
+	unsigned long MUX;
+	unsigned long DBR;
+	unsigned long RDIV2;
+	unsigned long RCNT;
+	unsigned long REG4DB;
+	unsigned long CP;
+	unsigned long LDF;
+	unsigned long LDP;
+	unsigned long PDP;
+	unsigned long SHDN;
+	unsigned long TRI;
+	//charge pump output high-impedance mode disabled
+	unsigned long RST;
+	// counter reset mode  normal operation
+	unsigned long ADDR2;
+} REGISTER2_t;
+
 
 typedef struct MAX2871 {
 	unsigned long long FreqOut;
@@ -150,6 +142,8 @@ typedef struct MAX2871 {
 	float CAL;
 	unsigned long DIVA;
 	REGISTER0_t register0;
+	REGISTER1_t register1;
+	REGISTER2_t register2;
 
 	int MCPADR;
 	int ATTREGADR;

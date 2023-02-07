@@ -15,14 +15,12 @@
 #define LE_HIGH() SET_BIT(GPIOA->ODR, GPIO_ODR_OD1)
 
 #define FREQ_OUT_SIZE 8
-#define LACT_SIZE 2
-#define MCPADR_SIZE 2
 
 typedef struct REGISTER0 {
 	//Register 0
 
-	unsigned long INT;     //Enables fractional-N mode
-	unsigned long NDIV;    // Integer part from N-Divider
+	unsigned long INT;
+	unsigned long NDIV;
 	unsigned long FRAC;
 	unsigned long ADDR0;
 } REGISTER0_t;
@@ -30,10 +28,10 @@ typedef struct REGISTER0 {
 typedef struct REGISTER1 {
 	//Register 1
 
-	unsigned long CPL;     //Charge pump liniarity 30%
-	unsigned long CPT;     //Charge pump test mode  normal mode
-	unsigned long PHASE;   //Phase Value (recomened)
-	unsigned long MODULUS; //4000 for max resolution
+	unsigned long CPL;
+	unsigned long CPT;
+	unsigned long PHASE;
+	unsigned long MODULUS;
 	unsigned long ADDR1;
 } REGISTER1_t;
 
@@ -53,9 +51,7 @@ typedef struct REGISTER2 {
 	unsigned long PDP;
 	unsigned long SHDN;
 	unsigned long TRI;
-	//charge pump output high-impedance mode disabled
 	unsigned long RST;
-	// counter reset mode  normal operation
 	unsigned long ADDR2;
 } REGISTER2_t;
 
@@ -105,15 +101,8 @@ typedef struct REGISTER5 {
 } REGISTER5_t;
 
 typedef struct MAX2871 {
+
 	unsigned long long FreqOut;
-	unsigned long long FreqOUTold;
-	unsigned long long FMIN;
-	unsigned long long FMAX;
-	float LMAX;
-	float LMIN;
-	float LACT;
-	float ATT;
-	float CAL;
 	unsigned long DIVA;
 	REGISTER0_t register0;
 	REGISTER1_t register1;
@@ -121,19 +110,11 @@ typedef struct MAX2871 {
 	REGISTER3_t register3;
 	REGISTER4_t register4;
 	REGISTER5_t register5;
-
-	int MCPADR;
-	int ATTREGADR;
-	int CALREGADR;
-	unsigned int CALBYTE;
-	unsigned int ATTBYTE;
-
 } MAX2871_t;
 
 void max2871Init();
-void max2871CalculateRegisterValues(MAX2871_t *ppl); //calculates values of NDIV, FRAC & DIVA
-unsigned long max2871RegisterInit(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl);
-void max2871Read();
+void max2871CalculateRegister0Values(MAX2871_t *ppl); // Calculates values of NDIV, FRAC & DIVA
+void max2871RegisterInit(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl);
 void max2871Write(SPI_HandleTypeDef *hspi2, unsigned long data);
 void max2871Program(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl);
 #endif /* INC_MAX2871_H_ */

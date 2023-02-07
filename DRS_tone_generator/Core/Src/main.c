@@ -29,7 +29,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define FREQ_STEP 12500
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -38,7 +38,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -51,7 +50,6 @@ SPI_HandleTypeDef hspi2;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,15 +59,62 @@ static void MX_I2C1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_CRC_Init(void);
-/* USER CODE BEGIN PFP */
 
+/* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
 MAX2871_t *ppl_ptr;
-uint8_t addrList[5] = { 0 };
+
+void getFreqOutFromEeprom(uint8_t buffer[10], MAX2871_t *ppl) {
+	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
+	for (int i = FREQ_OUT_SIZE - 1; i >= 0; i--)
+		ppl->FreqOut |= (buffer[i] << (i * 8));
+}
+
+unsigned long getFreqOut(unsigned long FreqBase) {
+	unsigned long suma_read;
+	/*	int Valor_0;
+		int Valor_1;
+		int Valor_2;
+		int Valor_3;
+		int Valor_4;
+		int Valor_5;
+		int Valor_6;
+		int Valor_7;
+		int Valor_8;
+		int Valor_9;
+
+	 Valor_0 = HAL_GPIO_ReadPin(SW_0_GPIO_Port, SW_0_Pin) ? 0 : FREQ_STEP;
+	 Valor_1 = HAL_GPIO_ReadPin(SW_1_GPIO_Port, SW_1_Pin) ? 0 : FREQ_STEP*2;
+	 Valor_2 = HAL_GPIO_ReadPin(SW_2_GPIO_Port, SW_2_Pin) ? 0 : FREQ_STEP*4;
+	 Valor_3 = HAL_GPIO_ReadPin(SW_3_GPIO_Port, SW_3_Pin) ? 0 : FREQ_STEP*8;
+	 Valor_4 = HAL_GPIO_ReadPin(SW_4_GPIO_Port, SW_4_Pin) ? 0 : FREQ_STEP*16;
+	 Valor_5 = HAL_GPIO_ReadPin(SW_5_GPIO_Port, SW_5_Pin) ? 0 : FREQ_STEP*32;
+	 Valor_6 = HAL_GPIO_ReadPin(SW_6_GPIO_Port, SW_6_Pin) ? 0 : FREQ_STEP*64;
+	 Valor_7 = HAL_GPIO_ReadPin(SW_7_GPIO_Port, SW_7_Pin) ? 0 : FREQ_STEP*128;
+	 Valor_8 = HAL_GPIO_ReadPin(SW_8_GPIO_Port, SW_8_Pin) ? 0 : FREQ_STEP*256;
+	 Valor_9 = HAL_GPIO_ReadPin(SW_9_GPIO_Port, SW_9_Pin) ? 0 : FREQ_STEP*512;
+
+	 suma_read = (Valor_0) + (Valor_1) + (Valor_2) + (Valor_3) + (Valor_4)
+	 + (Valor_5) + (Valor_6) + (Valor_7) + (Valor_8) + (Valor_9);
+	 */
+	suma_read = FreqBase;
+	suma_read += HAL_GPIO_ReadPin(SW_0_GPIO_Port, SW_0_Pin) ? 0 : FREQ_STEP;
+	suma_read += HAL_GPIO_ReadPin(SW_1_GPIO_Port, SW_1_Pin) ? 0 : FREQ_STEP * 2;
+	suma_read += HAL_GPIO_ReadPin(SW_2_GPIO_Port, SW_2_Pin) ? 0 : FREQ_STEP * 4;
+	suma_read += HAL_GPIO_ReadPin(SW_3_GPIO_Port, SW_3_Pin) ? 0 : FREQ_STEP * 8;
+	suma_read += HAL_GPIO_ReadPin(SW_4_GPIO_Port, SW_4_Pin) ? 0 : FREQ_STEP * 16;
+	suma_read += HAL_GPIO_ReadPin(SW_5_GPIO_Port, SW_5_Pin) ? 0 : FREQ_STEP * 32;
+	suma_read += HAL_GPIO_ReadPin(SW_6_GPIO_Port, SW_6_Pin) ? 0 : FREQ_STEP * 64;
+	suma_read += HAL_GPIO_ReadPin(SW_7_GPIO_Port, SW_7_Pin) ? 0 : FREQ_STEP * 128;
+	suma_read += HAL_GPIO_ReadPin(SW_8_GPIO_Port, SW_8_Pin) ? 0 : FREQ_STEP * 256;
+	suma_read += HAL_GPIO_ReadPin(SW_9_GPIO_Port, SW_9_Pin) ? 0 : FREQ_STEP * 512;
+	return suma_read;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -79,10 +124,9 @@ uint8_t addrList[5] = { 0 };
 int main(void) {
 	/* USER CODE BEGIN 1 */
 	MAX2871_t ppl;
-	ppl.FreqOUTold = 0;
 	ppl_ptr = &ppl;
-	ppl_ptr->ATTBYTE = 0;
 	LED_t led;
+	uint8_t buffer[10] = { 0 };
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -91,123 +135,65 @@ int main(void) {
 	HAL_Init();
 
 	/* USER CODE BEGIN Init */
-
 	/* USER CODE END Init */
 
 	/* Configure the system clock */
 	SystemClock_Config();
 
 	/* USER CODE BEGIN SysInit */
-
 	/* USER CODE END SysInit */
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-	MX_I2C1_Init();
+	//MX_I2C1_Init();
 	MX_SPI2_Init();
-	MX_USART1_UART_Init();
-	MX_CRC_Init();
+	//MX_USART1_UART_Init();
+	//MX_CRC_Init();
 	/* USER CODE BEGIN 2 */
-	i2c1MasterInit();
+
 	led_init(&led);
 	max2871Init(&ppl);
-	uint8_t addrList[5] = { 0 };
-	uint8_t freq_init[FREQ_OUT_SIZE] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
-			0x77, 0x88 };
-	m24c64WriteNBytes(BASE_ADDR, freq_init, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
-	uint8_t buffer[10] = { 0 };
-
-	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
-
-	for (int i = FREQ_OUT_SIZE - 1; i >= 0; i--)
-		ppl.FreqOut |= (buffer[i] << (i * 8));
-
-	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR + FREQ_OUT_SIZE,
-			LACT_SIZE);
-	ppl.LACT = buffer[0] + buffer[1] / 2.0;
-
-	if (ppl.FreqOut == -1) {
-		ppl.FreqOut = 4000000000;
-		ppl.LACT = 12;
-	}
-
-	HAL_Delay(200);
-	max2871CalculateRegisterValues(&ppl);
-
 	max2871RegisterInit(&hspi2, &ppl);
-	uint8_t IODIRA = 0x00;
+	i2c1MasterInit();
+	getFreqOutFromEeprom(buffer, &ppl);
 
-	buffer[0] = 0x00;
-	buffer[1] = IODIRA;
-	m24c64WriteNBytes(BASE_ADDR, buffer,
-			FREQ_OUT_ADDR + FREQ_OUT_SIZE + LACT_SIZE, MCPADR_SIZE);
-	uint8_t IODIRB = 0x01;
-	buffer[0] = 0x00;
-	buffer[1] = IODIRB;
-	m24c64WriteNBytes(BASE_ADDR, buffer,
-			FREQ_OUT_ADDR + FREQ_OUT_SIZE + LACT_SIZE, MCPADR_SIZE);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	int Valor_0;
-	int Valor_1;
-	int Valor_2;
-	int Valor_3;
-	int Valor_4;
-	int Valor_5;
-	int Valor_6;
-	int Valor_7;
-	int Valor_8;
-	int Valor_9;
-	unsigned long suma_current = -1;
-	unsigned long suma_read;
-	unsigned long suma_new = 0;
-	unsigned long ultima_suma = HAL_GetTick();
+	unsigned long freqOutCurrent = -1;
+	unsigned long freqOutRead;
+	unsigned long freqOutNew = 0;
+	unsigned long lastReadTick = HAL_GetTick();
 	unsigned long FreqBase = 149500000;
 
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 
 	while (1) {
-	/* USER CODE END WHILE */
-	/* USER CODE BEGIN 3 */
 
 		led_enable_kalive(&led);
+		freqOutRead = getFreqOut(FreqBase);
 
-		Valor_0 = HAL_GPIO_ReadPin(SW_0_GPIO_Port, SW_0_Pin) ? 0 : 12500;
-		Valor_1 = HAL_GPIO_ReadPin(SW_1_GPIO_Port, SW_1_Pin) ? 0 : 25000;
-		Valor_2 = HAL_GPIO_ReadPin(SW_2_GPIO_Port, SW_2_Pin) ? 0 : 50000;
-		Valor_3 = HAL_GPIO_ReadPin(SW_3_GPIO_Port, SW_3_Pin) ? 0 : 100000;
-		Valor_4 = HAL_GPIO_ReadPin(SW_4_GPIO_Port, SW_4_Pin) ? 0 : 200000;
-		Valor_5 = HAL_GPIO_ReadPin(SW_5_GPIO_Port, SW_5_Pin) ? 0 : 400000;
-		Valor_6 = HAL_GPIO_ReadPin(SW_6_GPIO_Port, SW_6_Pin) ? 0 : 800000;
-		Valor_7 = HAL_GPIO_ReadPin(SW_7_GPIO_Port, SW_7_Pin) ? 0 : 1600000;
-		Valor_8 = HAL_GPIO_ReadPin(SW_8_GPIO_Port, SW_8_Pin) ? 0 : 3200000;
-		Valor_9 = HAL_GPIO_ReadPin(SW_9_GPIO_Port, SW_9_Pin) ? 0 : 6400000;
-
-		suma_read = (Valor_0) + (Valor_1) + (Valor_2) + (Valor_3) + (Valor_4)
-								+ (Valor_5) + (Valor_6) + (Valor_7) + (Valor_8) + (Valor_9);
-
-		if (suma_read != suma_new) {
-			suma_end_off();
-			ultima_suma = HAL_GetTick();
+		if (freqOutRead != freqOutNew) {
+			Change_end_off();
+			lastReadTick = HAL_GetTick();
 			HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
-			suma_changing_on();
-			suma_new = suma_read;
+			Freq_changing_on();
+			freqOutNew = freqOutRead;
 		}
 
-		if ((HAL_GetTick() - ultima_suma) > 100) {
-			if (suma_new != suma_current) {
-				ppl.FreqOut = suma_read + FreqBase;
+		if ((HAL_GetTick() - lastReadTick) > 100) {
+			if (freqOutNew != freqOutCurrent) {
+				ppl.FreqOut = freqOutRead;
 				max2871Program(&hspi2, &ppl);
 				HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
-				suma_changing_off();
-				suma_end_on();
-				suma_current = suma_new;
+				Freq_changing_off();
+				Change_end_on();
+				freqOutCurrent = freqOutNew;
 			}
 		}
-	} // While End
+	}
 	/* USER CODE END WHILE */
 
 	/* USER CODE BEGIN 3 */

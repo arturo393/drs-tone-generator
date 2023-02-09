@@ -1,0 +1,3 @@
+../Core/Src/module.c:27:6:module_sample_timer3_init	0	static,ignoring_inline_asm
+../Core/Src/module.c:10:6:module_init	8	static
+../Core/Src/module.c:44:6:module_pa_state_update	24	static

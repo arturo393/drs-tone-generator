@@ -24,7 +24,7 @@
 extern CRC_HandleTypeDef hcrc;
 
 typedef enum State{
-	WAITING,
+	WAITING_DATA,
 	RX_DATA_COMPLETE,
 	CRC_OK
 }I2CState;

@@ -3,10 +3,10 @@
 ../Core/Src/max2871.c:35:15:getRegister2InitValue	16	static
 ../Core/Src/max2871.c:63:15:getRegister3InitValue	16	static
 ../Core/Src/max2871.c:81:15:getRegister4InitValue	16	static
-../Core/Src/max2871.c:109:15:getRegister5InitValue	16	static
-../Core/Src/max2871.c:126:6:max2871Init	16	static
-../Core/Src/max2871.c:132:6:max2871Write	32	static
-../Core/Src/max2871.c:152:6:max2871CalculateRegister0Values	272	static
-../Core/Src/max2871.c:201:6:max2871RegisterInit	24	static
-../Core/Src/max2871.c:214:6:waitForLock	24	static
-../Core/Src/max2871.c:223:6:max2871Program	24	static
+../Core/Src/max2871.c:112:15:getRegister5InitValue	16	static
+../Core/Src/max2871.c:129:6:max2871Init	16	static
+../Core/Src/max2871.c:135:6:max2871Write	32	static
+../Core/Src/max2871.c:155:6:max2871CalculateRegister0Values	272	static
+../Core/Src/max2871.c:204:6:max2871RegisterInit	24	static
+../Core/Src/max2871.c:217:6:waitForLock	24	static
+../Core/Src/max2871.c:226:6:max2871Program	24	static

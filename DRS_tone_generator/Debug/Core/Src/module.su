@@ -2,5 +2,5 @@
 ../Core/Src/module.c:10:6:pa_init	16	static
 ../Core/Src/module.c:27:6:toneUhfInit	16	static
 ../Core/Src/module.c:36:6:module_init	16	static
-../Core/Src/module.c:42:6:pa_sample_timer3_init	8	static
-../Core/Src/module.c:59:6:module_pa_state_update	16	static
+../Core/Src/module.c:40:6:pa_sample_timer3_init	8	static
+../Core/Src/module.c:57:6:module_pa_state_update	16	static

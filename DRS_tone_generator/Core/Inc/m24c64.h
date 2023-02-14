@@ -25,39 +25,27 @@ extern "C" {
 #include "string.h"
 
 #define CHIP_ADDR 0xa0
-#define PAGE_SIZE 32
-#define PAGE_NUM 256
+#define PAGE_SIZE 8
+#define PAGE_NUM 32
 #define IS_READY 0xaa
-#define PADDRPOSITION 5
+#define PADDRPOSITION 3
 
 // EEPROM ADDRESS (8bits)
-//#define EEPROM_ADDR 0xA0
-#define EEPROM_ADDR 0x50
+#define EEPROM_ADDR 0xA0
+//#define EEPROM_ADDR 0x50
 
 #define BASE_ADDR 0x03
 
-
+/*
+@page is the number of the start page. Range from 0 to PAGE_NUM-1
+@offset is the start byte offset in the page. Range from 0 to PAGE_SIZE-1
+@data is the pointer to the data to write in bytes
+@size is the size of the data
+*/
 typedef enum{
- 	FREQ_OUT_ADDR = BASE_ADDR ,
-	ATTENUATION_EN_A,
-	POUT_MAX_READY_ADDR,
- 	POUT_ADC_MAX_ADDR_0 ,
-	POUT_ADC_MAX_ADDR_1,
-	POUT_MIN_READY_ADDR,
-	POUT_ADC_MIN_ADDR_0,
-	POUT_ADC_MIN_ADDR_1,
- 	PIN_MAX_READY_ADDR,
- 	PIN_ADC_MAX_ADDR_0 ,
- 	PIN_ADC_MAX_ADDR_1,
-	PIN_MIN_READY_ADDR,
- 	PIN_ADC_MIN_ADDR_0 ,
- 	PIN_ADC_MIN_ADDR_1,
-	VSWR_MAX_READY_ADDR,
-	VSWR_ADC_MAX_ADDR_0 ,
- 	VSWR_ADC_MAX_ADDR_1,
-	VSWR_MIN_READY_ADDR,
- 	VSWR_ADC_MIN_ADDR_0,
- 	VSWR_ADC_MIN_ADDR_1
+	FREQ_OUT_ADDR = BASE_ADDR,
+	FREQ_BASE_ADDR,
+	POUT_ADDR
 }M24C64_ADDR_t;
 
 

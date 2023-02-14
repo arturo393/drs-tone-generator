@@ -10,13 +10,12 @@
 unsigned long getRegister0InitValue(MAX2871_t *ppl) {
 
 	ppl->register0.INT = 0x0UL;   // Enables fractional-N mode
-	ppl->register0.NDIV = 0x0UL;  // Sets integer part (N-divider) of the feedback divider factor
+	ppl->register0.NDIV = 0x0UL; // Sets integer part (N-divider) of the feedback divider factor
 	ppl->register0.FRAC = 0x0UL;  // Sets fractional value
 	ppl->register0.ADDR0 = 0x0UL; // Register address bits
 
-	return ppl->register0.INT << 31
-					| ppl->register0.NDIV << 15 | ppl->register0.FRAC << 3
-					| ppl->register0.ADDR0;
+	return ppl->register0.INT << 31 | ppl->register0.NDIV << 15
+			| ppl->register0.FRAC << 3 | ppl->register0.ADDR0;
 }
 
 unsigned long getRegister1InitValue(MAX2871_t *ppl) {
@@ -27,9 +26,9 @@ unsigned long getRegister1InitValue(MAX2871_t *ppl) {
 	ppl->register1.MODULUS = 0xFA0UL;  // 4000 for max resolution
 	ppl->register1.ADDR1 = 0x1UL;      // Register address bits
 
-	return ppl->register1.CPL << 29
-					| ppl->register1.CPT << 27 | ppl->register1.PHASE << 15
-					| ppl->register1.MODULUS << 3 | ppl->register1.ADDR1;
+	return ppl->register1.CPL << 29 | ppl->register1.CPT << 27
+			| ppl->register1.PHASE << 15 | ppl->register1.MODULUS << 3
+			| ppl->register1.ADDR1;
 }
 
 unsigned long getRegister2InitValue(MAX2871_t *ppl) {
@@ -41,7 +40,7 @@ unsigned long getRegister2InitValue(MAX2871_t *ppl) {
 	ppl->register2.RDIV2 = 0x0UL;  // Reference divide-by-2 is disabled
 	ppl->register2.RCNT = 0x0UL;   // Reference divide Value is unused
 	ppl->register2.REG4DB = 0x0UL; // Double buffer mode disabled
-	ppl->register2.CP = 0x00UL;    // Charge pump current  0.32 mA (1.36/RSET * (1 + CP[3:0]) RSET  5k1)
+	ppl->register2.CP = 0x00UL; // Charge pump current  0.32 mA (1.36/RSET * (1 + CP[3:0]) RSET  5k1)
 	ppl->register2.LDF = 0x0UL;    // Lock detect function  Frac-N lock detect
 	ppl->register2.LDP = 0x0UL;    // Lock detect precision  10ns
 	ppl->register2.PDP = 0x1UL;    // Phase detector polarity set positive
@@ -50,14 +49,14 @@ unsigned long getRegister2InitValue(MAX2871_t *ppl) {
 	ppl->register2.RST = 0x0UL;    // Sets counter reset mode
 	ppl->register2.ADDR2 = 0x2UL;  // Register address bits
 
-	return ppl->register2.LDS << 31
-					| ppl->register2.SDN << 29 | ppl->register2.MUX << 26
-					| ppl->register2.DBR << 25 | ppl->register2.RDIV2 << 24
-					| ppl->register2.RCNT << 14 | ppl->register2.REG4DB << 13
-					| ppl->register2.CP << 9 | ppl->register2.LDF << 8
-					| ppl->register2.LDP << 7 | ppl->register2.PDP << 6
-					| ppl->register2.SHDN << 5 | ppl->register2.TRI << 4
-					| ppl->register2.RST << 3 | ppl->register2.ADDR2;
+	return ppl->register2.LDS << 31 | ppl->register2.SDN << 29
+			| ppl->register2.MUX << 26 | ppl->register2.DBR << 25
+			| ppl->register2.RDIV2 << 24 | ppl->register2.RCNT << 14
+			| ppl->register2.REG4DB << 13 | ppl->register2.CP << 9
+			| ppl->register2.LDF << 8 | ppl->register2.LDP << 7
+			| ppl->register2.PDP << 6 | ppl->register2.SHDN << 5
+			| ppl->register2.TRI << 4 | ppl->register2.RST << 3
+			| ppl->register2.ADDR2;
 }
 
 unsigned long getRegister3InitValue(MAX2871_t *ppl) {
@@ -71,11 +70,10 @@ unsigned long getRegister3InitValue(MAX2871_t *ppl) {
 	ppl->register3.CDIV = 0x0UL;     // Clock divider value unused
 	ppl->register3.ADDR3 = 0x3UL;    // Register address bits
 
-	return ppl->register3.VCO_MS << 26
-					| ppl->register3.VAS_SHDN << 25 | ppl->register3.RETUNE << 24
-					| ppl->register3.CSM << 18 | ppl->register3.MUTEDEL << 17
-					| ppl->register3.CDM << 15 | ppl->register3.CDIV << 3
-					| ppl->register3.ADDR3;
+	return ppl->register3.VCO_MS << 26 | ppl->register3.VAS_SHDN << 25
+			| ppl->register3.RETUNE << 24 | ppl->register3.CSM << 18
+			| ppl->register3.MUTEDEL << 17 | ppl->register3.CDM << 15
+			| ppl->register3.CDIV << 3 | ppl->register3.ADDR3;
 }
 
 unsigned long getRegister4InitValue(MAX2871_t *ppl) {
@@ -85,28 +83,27 @@ unsigned long getRegister4InitValue(MAX2871_t *ppl) {
 	ppl->register4.SDDIV = 0x0UL;  // VCO Divider enabled
 	ppl->register4.SDREF = 0x0UL;  // Reference input enabled
 	ppl->register4.FB = 0x1UL;     // VCO to N counter mode is NOT divided
-	ppl->register4.BS = 0x30FFUL;  // Should be chosen so that fPFD/BS  50kH or less
+	ppl->register4.BS = 0x30FFUL; // Should be chosen so that fPFD/BS  50kH or less
 	ppl->register4.SDVCO = 0x0UL;  // VCO enabled
 	ppl->register4.MTLD = 0x0UL;   // RFOUT Mute until Lock detect mode disabled
-	ppl->register4.BDIV = 0x0UL;   // RFOUTB is divided (so it's the same as RFOUTA)
+	ppl->register4.BDIV = 0x0UL; // RFOUTB is divided (so it's the same as RFOUTA)
 	ppl->register4.RFB_EN = 0x0UL; // RFOUTB disabled
 	ppl->register4.BPWR = 0x3UL;   // RFOUTB  5 dBm
 	ppl->register4.RFA_EN = 0x1UL; // RFOUTA enabled
-	ppl->register4.APWR = 0x2UL;   // Sets RFOUTA single-ended output power   (00 = -4dBm)
-	                                                                        //(01 = -1dBm)
-	                                                                        //(10 = +2dBm)
-	                                                                        //(11 = +5dBm)
+	ppl->register4.APWR = 0x2UL; // Sets RFOUTA single-ended output power   (00 = -4dBm)
+								 //(01 = -1dBm)
+								 //(10 = +2dBm)
+								 //(11 = +5dBm)
 	ppl->register4.ADDR4 = 0x4UL;  // Register address bits
 
-	return 	ppl->register4.RES << 29
-			| ppl->register4.SDLDO << 28 | ppl->register4.SDDIV << 27
-			| ppl->register4.SDREF << 26 | ppl->register4.FB << 23
-			| ppl->DIVA << 20 | ppl->register4.BS << 12
-			| ppl->register4.SDVCO << 11 | ppl->register4.MTLD << 10
-			| ppl->register4.BDIV << 9 | ppl->register4.RFB_EN << 8
-			| ppl->register4.BPWR << 6 | ppl->register4.RFA_EN << 5
-			| ppl->register4.APWR << 3 | ppl->register4.ADDR4;
-
+	return ppl->register4.RES << 29 | ppl->register4.SDLDO << 28
+			| ppl->register4.SDDIV << 27 | ppl->register4.SDREF << 26
+			| ppl->register4.FB << 23 | ppl->DIVA << 20
+			| ppl->register4.BS << 12 | ppl->register4.SDVCO << 11
+			| ppl->register4.MTLD << 10 | ppl->register4.BDIV << 9
+			| ppl->register4.RFB_EN << 8 | ppl->register4.BPWR << 6
+			| ppl->register4.RFA_EN << 5 | ppl->register4.APWR << 3
+			| ppl->register4.ADDR4;
 }
 
 unsigned long getRegister5InitValue(MAX2871_t *ppl) {
@@ -128,8 +125,38 @@ unsigned long getRegister5InitValue(MAX2871_t *ppl) {
 
 void max2871Init(MAX2871_t *ppl) {
 	// Composition of MAX2971 Registers
-	ppl->FreqOut = 0;
+
+	ppl->freqOutCurrent = -1;
+	ppl->freqOutRead;
+	ppl->freqOutNew;
+	ppl->FreqOutCh = 0x0UL;
 	ppl->DIVA = 0x0UL;
+	ppl->freqBase = 0x0UL;
+	ppl->FreqBaseCh = 0x0UL;
+	ppl->ON_OFF;
+	ppl->PdBmCh = 0x0UL;
+	ppl->lastReadTick = HAL_GetTick();
+	ppl->freqOutUpdate = false;
+	ppl->freqBaseUpdate = false;
+	ppl->PdBmUpdate = false;
+
+	ppl->FreqOut = getFreqOutFromEeprom();
+	if ((ppl->FreqOut < FREQ_OUT_MIN) || (ppl->FreqOut > FREQ_OUT_MAX)) {
+		ppl->FreqOut = 145000000;
+	}
+	ppl->freqBase = getFreqBaseFromEeprom();
+	if ((ppl->freqBase < FREQ_BASE_MIN) || (ppl->freqBase > FREQ_BASE_MAX)) {
+		ppl->freqBase = 145000000;
+	}
+	ppl->register4.APWR = getPdBmFromEeprom();
+	if ((ppl->register4.APWR < 0) || (ppl->register4.APWR > 3)) {
+		ppl->register4.APWR = 0x2UL;
+	}
+	ppl->freqOutNew = getFreqOut(ppl->freqBase);
+	ppl->freqOutCurrent = ppl->freqOutNew;
+
+	ppl->freqOutNew = getFreqOut(ppl->freqBase);
+
 }
 
 void max2871Write(SPI_HandleTypeDef *hspi2, unsigned long data)
@@ -207,7 +234,7 @@ void max2871RegisterInit(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) {
 		max2871Write(hspi2, getRegister5InitValue(ppl));
 		HAL_Delay(20);
 		max2871Write(hspi2, getRegister4InitValue(ppl));
-        max2871Write(hspi2, getRegister3InitValue(ppl));
+		max2871Write(hspi2, getRegister3InitValue(ppl));
 		max2871Write(hspi2, getRegister2InitValue(ppl));
 		max2871Write(hspi2, getRegister1InitValue(ppl));
 		max2871Write(hspi2, getRegister0InitValue(ppl));
@@ -217,9 +244,11 @@ void max2871RegisterInit(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) {
 void waitForLock() {
 	GPIO_PinState lock = GPIO_PIN_SET;
 	unsigned long t_ini = HAL_GetTick();
-	while (lock == GPIO_PIN_SET || (HAL_GetTick() - t_ini < 2000)) {
+	unsigned long test;
+	while (lock == GPIO_PIN_SET && (test < 2000)) {
+		test = HAL_GetTick() - t_ini;
 		lock = HAL_GPIO_ReadPin(MAX_LOCK_DETECTOR_GPIO_Port,
-				MAX_LOCK_DETECTOR_Pin);
+		MAX_LOCK_DETECTOR_Pin);
 	}
 }
 

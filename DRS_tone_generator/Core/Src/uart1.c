@@ -22,8 +22,7 @@ uint8_t  uart1_clean_by_timeout(UART1_t* uart1,const char* str){
 void uart1_gpio_init() {
 	/**USART1 GPIO Configuration
 	 PA9     ------> USART1_TX
-	 PA10     ------> USART1_RX
-	 */
+	 PA10    ------> USART1_RX **/
 
 	/* PA10 alternate mode */
 	CLEAR_BIT(GPIOA->MODER, GPIO_MODER_MODE10_0);

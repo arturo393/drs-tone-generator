@@ -14,7 +14,11 @@
 #define LE_LOW()  CLEAR_BIT(GPIOA->ODR, GPIO_ODR_OD1)
 #define LE_HIGH() SET_BIT(GPIOA->ODR, GPIO_ODR_OD1)
 
-#define FREQ_OUT_SIZE 8
+#define FREQ_OUT_SIZE 4
+#define FREQ_BASE_MIN 142500000UL
+#define FREQ_BASE_MAX 148412500UL
+#define FREQ_OUT_MIN 142500000UL
+#define FREQ_OUT_MAX 161200000UL
 
 typedef struct REGISTER0 {
 	//Register 0
@@ -103,7 +107,20 @@ typedef struct REGISTER5 {
 typedef struct MAX2871 {
 
 	unsigned long long FreqOut;
+	unsigned long freqOutCurrent;
+	unsigned long freqOutRead;
+	unsigned long freqOutNew;
+	unsigned long FreqOutCh;
 	unsigned long DIVA;
+	unsigned long freqBase;
+	unsigned long FreqBaseCh;
+	unsigned long ON_OFF; // TODO : Este comando muere
+	unsigned long PdBmCh;
+	unsigned long lastReadTick;
+    bool freqOutUpdate;
+	bool freqBaseUpdate;
+	bool PdBmUpdate;
+
 	REGISTER0_t register0;
 	REGISTER1_t register1;
 	REGISTER2_t register2;

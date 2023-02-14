@@ -19,11 +19,11 @@
 #define sys_rp_led_on() SET_BIT(GPIOB->ODR,GPIO_ODR_OD1)
 #define sys_rp_led_off() CLEAR_BIT(GPIOB->ODR,GPIO_ODR_OD1)
 
-#define Change_end_on() SET_BIT(GPIOA->ODR,GPIO_ODR_OD7)
-#define Change_end_off() CLEAR_BIT(GPIOA->ODR,GPIO_ODR_OD7)
+#define Change_end_on_led() SET_BIT(GPIOA->ODR,GPIO_ODR_OD7)
+#define Change_end_off_led() CLEAR_BIT(GPIOA->ODR,GPIO_ODR_OD7)
 
-#define Freq_changing_on() SET_BIT(GPIOB->ODR,GPIO_ODR_OD0)
-#define Freq_changing_off() CLEAR_BIT(GPIOB->ODR,GPIO_ODR_OD0)
+#define Freq_changing_on_led() SET_BIT(GPIOB->ODR,GPIO_ODR_OD0)
+#define Freq_changing_off_led() CLEAR_BIT(GPIOB->ODR,GPIO_ODR_OD0)
 
 typedef struct LED{
 	uint32_t ka_counter;

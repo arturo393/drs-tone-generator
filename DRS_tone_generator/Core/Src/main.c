@@ -35,10 +35,7 @@
 #define FREQ_STEP 12500
 #define HS16_CLK 16000000
 #define BAUD_RATE 115200
-#define FREQ_BASE_MIN 142500000UL
-#define FREQ_BASE_MAX 148412500UL
-#define FREQ_OUT_MIN 142500000UL
-#define FREQ_OUT_MAX 161200000UL
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -80,31 +77,190 @@ MAX2871_t *ppl_ptr;
 UART1_t *uart1_ptr;
 Tone_uhf_t *uhf_ptr;
 RS485_t *rs485_ptr;
+unsigned long a;
+unsigned long b;
+unsigned long c;
 
-void getFreqOutFromEeprom(uint8_t buffer[10], MAX2871_t *ppl) {
-	m24c64ReadNBytes(BASE_ADDR, buffer, FREQ_OUT_ADDR, FREQ_OUT_SIZE);
-	for (int i = FREQ_OUT_SIZE - 1; i >= 0; i--)
-		ppl->FreqOut |= (buffer[i] << (i * 8));
+unsigned long getFreqOutFromEeprom() {
+
+	uint8_t buffer[4] = { 0 };
+	unsigned long FreqOutSave = 0;
+	m24c64ReadNBytes(FREQ_OUT_ADDR, buffer, 0, FREQ_OUT_SIZE);
+	for (int i = 0; i < FREQ_OUT_SIZE; i++) {
+		FreqOutSave |= (buffer[i] << ((i) * 8));
+	}
+	return FreqOutSave;
+}
+
+unsigned long getFreqBaseFromEeprom() {
+
+	uint8_t buffer[4] = { 0 };
+	unsigned long FreqBaseSave = 0;
+	m24c64ReadNBytes(FREQ_BASE_ADDR, buffer, 0, FREQ_OUT_SIZE);
+	for (int i = 0; i < FREQ_OUT_SIZE; i++) {
+		FreqBaseSave |= (buffer[i] << ((i) * 8));
+	}
+	return FreqBaseSave;
+}
+
+unsigned long getPdBmFromEeprom() {
+
+	uint8_t buffer[4] = { 0 };
+	unsigned long PdBmSave = 0;
+	m24c64ReadNBytes(POUT_ADDR, buffer, 0, FREQ_OUT_SIZE);
+	for (int i = 0; i < FREQ_OUT_SIZE; i++) {
+		PdBmSave |= (buffer[i] << ((i) * 8));
+	}
+	return PdBmSave;
 }
 
 unsigned long getFreqOut(unsigned long FreqBase) {
 	unsigned long suma_read;
-	suma_read = FreqBase;
+
+	suma_read = 0;
 	suma_read += HAL_GPIO_ReadPin(SW_0_GPIO_Port, SW_0_Pin) ? 0 : FREQ_STEP;
 	suma_read += HAL_GPIO_ReadPin(SW_1_GPIO_Port, SW_1_Pin) ? 0 : FREQ_STEP * 2;
 	suma_read += HAL_GPIO_ReadPin(SW_2_GPIO_Port, SW_2_Pin) ? 0 : FREQ_STEP * 4;
 	suma_read += HAL_GPIO_ReadPin(SW_3_GPIO_Port, SW_3_Pin) ? 0 : FREQ_STEP * 8;
-	suma_read += HAL_GPIO_ReadPin(SW_4_GPIO_Port, SW_4_Pin) ? 0 : FREQ_STEP * 16;
-	suma_read += HAL_GPIO_ReadPin(SW_5_GPIO_Port, SW_5_Pin) ? 0 : FREQ_STEP * 32;
-	suma_read += HAL_GPIO_ReadPin(SW_6_GPIO_Port, SW_6_Pin) ? 0 : FREQ_STEP * 64;
-	suma_read += HAL_GPIO_ReadPin(SW_7_GPIO_Port, SW_7_Pin) ? 0 : FREQ_STEP * 128;
-	suma_read += HAL_GPIO_ReadPin(SW_8_GPIO_Port, SW_8_Pin) ? 0 : FREQ_STEP * 256;
-	suma_read += HAL_GPIO_ReadPin(SW_9_GPIO_Port, SW_9_Pin) ? 0 : FREQ_STEP * 512;
+	suma_read +=
+			HAL_GPIO_ReadPin(SW_4_GPIO_Port, SW_4_Pin) ? 0 : FREQ_STEP * 16;
+	suma_read +=
+			HAL_GPIO_ReadPin(SW_5_GPIO_Port, SW_5_Pin) ? 0 : FREQ_STEP * 32;
+	suma_read +=
+			HAL_GPIO_ReadPin(SW_6_GPIO_Port, SW_6_Pin) ? 0 : FREQ_STEP * 64;
+	suma_read +=
+			HAL_GPIO_ReadPin(SW_7_GPIO_Port, SW_7_Pin) ? 0 : FREQ_STEP * 128;
+	suma_read +=
+			HAL_GPIO_ReadPin(SW_8_GPIO_Port, SW_8_Pin) ? 0 : FREQ_STEP * 256;
+	suma_read +=
+			HAL_GPIO_ReadPin(SW_9_GPIO_Port, SW_9_Pin) ? 0 : FREQ_STEP * 512;
 	return suma_read;
 }
 
 void USART1_IRQHandler(void) {
 	uart1_read_to_frame(uart1_ptr);
+}
+
+void rs485_cmd(const UART1_t *uart1, RS485_t *rs485, MAX2871_t *ppl) {
+	switch (rs485->cmd) {
+	case QUERY_PARAMETER_FREQOUT: //cmd = 31
+		ppl->FreqOutCh = 0;
+		ppl->FreqOutCh = uart1->rx_buffer[4] << 24;
+		ppl->FreqOutCh |= uart1->rx_buffer[5] << 16;
+		ppl->FreqOutCh |= uart1->rx_buffer[6] << 8;
+		ppl->FreqOutCh |= uart1->rx_buffer[7];
+		if ((ppl->FreqOutCh > FREQ_OUT_MIN)
+				&& (ppl->FreqOutCh < FREQ_OUT_MAX)) {
+			ppl->FreqOut = ppl->FreqOutCh;
+			sprintf(uart1->tx_buffer, "New Frequency Out: %u\n", ppl->FreqOutCh);
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+			ppl->freqOutUpdate = true;
+		}else{
+			sprintf(uart1->tx_buffer, "OUT OF RANGE \n");
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+		}
+		rs485->cmd = NONE;
+		break;
+	case QUERY_PARAMETER_ON_OFF: //cmd = 32
+		ppl->ON_OFF = 0;
+		ppl->ON_OFF = uart1->rx_buffer[4] << 24;
+		ppl->ON_OFF |= uart1->rx_buffer[5] << 16;
+		ppl->ON_OFF |= uart1->rx_buffer[6] << 8;
+		ppl->ON_OFF |= uart1->rx_buffer[7];
+		if (ppl->ON_OFF == 0) {
+			HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
+			sprintf(uart1->tx_buffer, "RFA DISABLED \n");
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+		}
+		if (ppl->ON_OFF == 1) {
+			HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
+			sprintf(uart1->tx_buffer, "RFA ENABLED \n");
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+		}
+		rs485->cmd = NONE;
+		break;
+	case QUERY_PARAMETER_FREQBASE: //cmd = 33
+		ppl->FreqBaseCh = 0;
+		ppl->FreqBaseCh = uart1->rx_buffer[4] << 24;
+		ppl->FreqBaseCh |= uart1->rx_buffer[5] << 16;
+		ppl->FreqBaseCh |= uart1->rx_buffer[6] << 8;
+		ppl->FreqBaseCh |= uart1->rx_buffer[7];
+		if ((ppl->FreqBaseCh > FREQ_BASE_MIN) && (ppl->FreqBaseCh < FREQ_BASE_MAX)) {
+			ppl->freqBase = ppl->FreqBaseCh;
+			ppl->FreqOut = ppl->freqOutRead + ppl->freqBase;
+			ppl->freqBaseUpdate = true;
+			sprintf(uart1->tx_buffer, "New Base Frequency: %u\n",
+					ppl->FreqBaseCh);
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+		}else{
+			sprintf(uart1->tx_buffer, "OUT OF RANGE \n");
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+		}
+		rs485->cmd = NONE;
+		break;
+	case QUERY_PARAMETER_PdBm: //cmd = 34
+		ppl->PdBmCh = 0;
+		ppl->PdBmCh = uart1->rx_buffer[4] << 24;
+		ppl->PdBmCh |= uart1->rx_buffer[5] << 16;
+		ppl->PdBmCh |= uart1->rx_buffer[6] << 8;
+		ppl->PdBmCh |= uart1->rx_buffer[7];
+		if (ppl->PdBmCh == 0) {
+			//Power out -4dBm
+			ppl->register4.APWR = 0x0UL;
+			ppl->PdBmUpdate = true;
+			sprintf(uart1->tx_buffer, "PdBm out = -4dBm \n");
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+		}
+		if (ppl->PdBmCh == 1) {
+			//Power out -1dBm
+			ppl->register4.APWR = 0x1UL;
+			ppl->PdBmUpdate = true;
+			sprintf(uart1->tx_buffer, "PdBm out = -1dBm \n");
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+		}
+		if (ppl->PdBmCh == 2) {
+			//Power out +2dBm
+			ppl->register4.APWR = 0x2UL;
+			ppl->PdBmUpdate = true;
+			sprintf(uart1->tx_buffer, "PdBm out = +2dBm \n");
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+		}
+		if (ppl->PdBmCh == 3) {
+			//Power out +5dBm
+			ppl->register4.APWR = 0x3UL;
+			ppl->PdBmUpdate = true;
+			sprintf(uart1->tx_buffer, "PdBm out = +5dBm \n");
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+		}
+		rs485->cmd = NONE;
+		break;
+	default:
+		rs485->cmd = NONE;
+		break;
+	}
+}
+
+void freqOutUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
+	ppl->freqOutRead = getFreqOut(ppl->freqBase);
+	if (ppl->freqOutRead != ppl->freqOutNew) {
+		Change_end_off_led();
+		ppl->lastReadTick = HAL_GetTick();
+		HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
+		Freq_changing_on_led();
+		ppl->freqOutNew = ppl->freqOutRead;
+	}
+	if ((HAL_GetTick() - ppl->lastReadTick) > 100) {
+		if (ppl->freqOutNew != ppl->freqOutCurrent) {
+			ppl->FreqOut = ppl->freqOutRead + ppl->freqBase;
+			sprintf(uart1->tx_buffer, "New Frequency Out: %u\n", ppl->FreqOut);
+			uart1_send_frame(uart1->tx_buffer, TX_BUFFLEN);
+			ppl->freqOutUpdate = true;
+			HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
+			Freq_changing_off_led();
+			Change_end_on_led();
+			ppl->freqOutCurrent = ppl->freqOutNew;
+		}
+	}
 }
 
 /* USER CODE END 0 */
@@ -115,18 +271,15 @@ void USART1_IRQHandler(void) {
  */
 int main(void) {
 	/* USER CODE BEGIN 1 */
-
 	RS485_t rs485;
 	MAX2871_t ppl;
 	ppl_ptr = &ppl;
 	LED_t led;
-	uint8_t buffer[10] = { 0 };
 	UART1_t uart1;
 	Tone_uhf_t uhf;
 	uart1_ptr = &uart1;
 	uhf_ptr = &uhf;
 	rs485_ptr = &rs485;
-
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -149,145 +302,49 @@ int main(void) {
 	MX_SPI2_Init();
 	//MX_USART1_UART_Init();
 	//MX_CRC_Init();
+
 	/* USER CODE BEGIN 2 */
 	toneUhfInit(UHF_TONE, ID0, &uhf);
-
 	rs485_init(&rs485);
 	led_init(&led);
-	max2871Init(&ppl);
-	max2871RegisterInit(&hspi2, &ppl);
 	i2c1MasterInit();
 	uart1_init(HS16_CLK, BAUD_RATE, &uart1);
-	getFreqOutFromEeprom(buffer, &ppl);
-
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-
-	unsigned long freqOutCurrent = -1;
-	unsigned long freqOutRead;
-	unsigned long freqOutNew = 0;
-	unsigned long lastReadTick = HAL_GetTick();
-	unsigned long FreqBase = 145000000;
-	unsigned long ON_OFF;
-	unsigned long FreqOutCh;
-	unsigned long FreqBaseCh;
-	unsigned long PdBmCh;
-
+	max2871Init(&ppl);
+	max2871RegisterInit(&hspi2, &ppl);
+	max2871Program(&hspi2, &ppl);
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 
 	while (1) {
 
 		led_enable_kalive(&led);
-		freqOutRead = getFreqOut(FreqBase);
 
-		if (freqOutRead != freqOutNew) {
-			sprintf(uart1.tx_buffer, "Frequency: %u\n", freqOutRead);
-			uart1_send_frame(uart1.tx_buffer, TX_BUFFLEN);
-			Change_end_off();
-			lastReadTick = HAL_GetTick();
-			HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
-			Freq_changing_on();
-			freqOutNew = freqOutRead;
-		}
-
-		if ((HAL_GetTick() - lastReadTick) > 100) {
-			if (freqOutNew != freqOutCurrent) {
-				ppl.FreqOut = freqOutRead;
-				max2871Program(&hspi2, &ppl);
-				HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
-				Freq_changing_off();
-				Change_end_on();
-				freqOutCurrent = freqOutNew;
-			}
-		}
-
+		freqOutUpdate(&uart1, &ppl);
 		rs485_update_status_by_uart(&rs485, &uart1);
+		rs485_cmd(&uart1, &rs485, &ppl);
 
-		switch (rs485.cmd) {
-		case QUERY_PARAMETER_FREQOUT: //cmd = 31
-			FreqOutCh = 0;
-			FreqOutCh = uart1.rx_buffer[4] << 24;
-			FreqOutCh |= uart1.rx_buffer[5] << 16;
-			FreqOutCh |= uart1.rx_buffer[6] << 8;
-			FreqOutCh |= uart1.rx_buffer[7];
-
-			if(FreqOutCh > FREQ_OUT_MIN & FreqOutCh < FREQ_OUT_MAX){
-		    ppl.FreqOut = FreqOutCh;
-
-		    sprintf(uart1.tx_buffer, "New Frequency: %u\n", FreqOutCh);
-		    uart1_send_frame(uart1.tx_buffer, TX_BUFFLEN);
-
+		if (ppl.freqOutUpdate) {
+			ppl.freqOutUpdate = false;
 			max2871Program(&hspi2, &ppl);
-			}
-			rs485.cmd = NONE;
-			break;
+			m24c64WriteNBytes(FREQ_OUT_ADDR, (uint8_t*) (&ppl.FreqOut), 0,
+					FREQ_OUT_SIZE);
+		}
 
-		case QUERY_PARAMETER_ON_OFF: //cmd = 32
-			ON_OFF = 0;
-			ON_OFF = uart1.rx_buffer[4] << 24;
-			ON_OFF |= uart1.rx_buffer[5] << 16;
-			ON_OFF |= uart1.rx_buffer[6] << 8;
-			ON_OFF |= uart1.rx_buffer[7];
-
-			if(ON_OFF == 0){
-		    HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
-		    sprintf(uart1.tx_buffer, "RFA DISABLED \n");
-		    uart1_send_frame(uart1.tx_buffer, TX_BUFFLEN);
-			}
-			if(ON_OFF == 1){
-		    HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
-		    sprintf(uart1.tx_buffer, "RFA ENABLED \n");
-		    uart1_send_frame(uart1.tx_buffer, TX_BUFFLEN);
-			}
-			rs485.cmd = NONE;
-			break;
-
-		case QUERY_PARAMETER_FREQBASE: //cmd = 33
-			FreqBaseCh = 0;
-			FreqBaseCh = uart1.rx_buffer[4] << 24;
-			FreqBaseCh |= uart1.rx_buffer[5] << 16;
-			FreqBaseCh |= uart1.rx_buffer[6] << 8;
-			FreqBaseCh |= uart1.rx_buffer[7];
-
-			if(FreqBaseCh > FREQ_BASE_MIN & FreqBaseCh < FREQ_BASE_MAX){
-				FreqBase = FreqBaseCh;
-				sprintf(uart1.tx_buffer, "New Base Frequency: %u\n", FreqBaseCh);
-				uart1_send_frame(uart1.tx_buffer, TX_BUFFLEN);
-			}
-			rs485.cmd = NONE;
-			break;
-
-		case QUERY_PARAMETER_PdBm: //cmd = 34
-			PdBmCh = 0;
-			PdBmCh = uart1.rx_buffer[4] << 24;
-			PdBmCh |= uart1.rx_buffer[5] << 16;
-			PdBmCh |= uart1.rx_buffer[6] << 8;
-			PdBmCh |= uart1.rx_buffer[7];
-
-			if(PdBmCh == 0){     //Potencia de la salida en -4dBm
-			ppl.register4.APWR = 0x0UL;
+		if (ppl.freqBaseUpdate) {
+			ppl.freqBaseUpdate = false;
 			max2871Program(&hspi2, &ppl);
-			}
-			if(PdBmCh == 1){     //Potencia de la salida en -1dBm
-			ppl.register4.APWR = 0x1UL;
-			max2871Program(&hspi2, &ppl);
-			}
-			if(PdBmCh == 2){     //Potencia de la salida en +2dBm
-			ppl.register4.APWR = 0x2UL;
-			max2871Program(&hspi2, &ppl);
-		    }
-			if(PdBmCh == 3){     //Potencia de la salida en +5dBm
-			ppl.register4.APWR = 0x3UL;
-			max2871Program(&hspi2, &ppl);
-			}
-			rs485.cmd = NONE;
-			break;
+			m24c64WriteNBytes(FREQ_BASE_ADDR, (uint8_t*) (&ppl.freqBase), 0,
+					FREQ_OUT_SIZE);
+		}
 
-		default:
-			rs485.cmd = NONE;
-			break;
+		if (ppl.PdBmUpdate) {
+			ppl.PdBmUpdate = false;
+			max2871Program(&hspi2, &ppl);
+			m24c64WriteNBytes(POUT_ADDR, (uint8_t*) (&ppl.register4.APWR), 0,
+					FREQ_OUT_SIZE);
 		}
 
 	}

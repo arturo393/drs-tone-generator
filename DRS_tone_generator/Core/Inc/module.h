@@ -70,5 +70,6 @@ void module_init(Module_pa_t*,Function_t,Id_t);
 void module_calc_parameters(Module_pa_t m,uint16_t* media_array);
 void pa_sample_timer3_init();
 void module_pa_state_update(Module_pa_t *pa);
+void toneUhfInit(Function_t funcion, Id_t id, Tone_uhf_t *uhf);
 
 #endif /* INC_LTEL_H_ */

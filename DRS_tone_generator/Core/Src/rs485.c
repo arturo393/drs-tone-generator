@@ -30,7 +30,7 @@ void rs485_init(RS485_t *r) {
 	r->status = DONE;
 	r->cmd = NONE;
 
-	/* PB5 DE485 as output  */
+	/* PB9 DE485 as output  */
 	SET_BIT(GPIOB->MODER, GPIO_MODER_MODE9_0);
 	CLEAR_BIT(GPIOB->MODER, GPIO_MODER_MODE9_1);
 

@@ -37,8 +37,6 @@ void module_init(Module_pa_t *module, Function_t funcion, Id_t id) {
 
 }
 
-
-
 void pa_sample_timer3_init() {
 	/*enable clock access to timer 2 */
 	SET_BIT(RCC->APBENR1, RCC_APBENR1_TIM3EN);
@@ -71,5 +69,4 @@ void module_pa_state_update(Module_pa_t *pa) {
 	if (pa->enable == OFF)
 		pa_off();
 }
-
 

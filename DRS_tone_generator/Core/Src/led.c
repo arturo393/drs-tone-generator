@@ -7,13 +7,13 @@
 #include "led.h"
 
 void led_init(LED_t *led) {
-	/*CURRENT NORMAL LED PA7 (A) as output SUMA CHANGING*/
+	/*CURRENT NORMAL LED PA7 (A)*/
 	SET_BIT(GPIOA->MODER, GPIO_MODER_MODE7_0);
 	CLEAR_BIT(GPIOA->MODER, GPIO_MODER_MODE7_1);
-	/*CURRENT NORMAL LED PB0 (B)  as output SUMA END*/
+	/*CURRENT NORMAL LED PB0 (B)*/
 	SET_BIT(GPIOB->MODER, GPIO_MODER_MODE0_0);
 	CLEAR_BIT(GPIOB->MODER, GPIO_MODER_MODE0_1);
-	/*CURRENT NORMAL LED PB1 (SR) as output SYSTEM R */
+	/*CURRENT NORMAL LED PB1 (SR)*/
 	SET_BIT(GPIOB->MODER, GPIO_MODER_MODE1_0);
 	CLEAR_BIT(GPIOB->MODER, GPIO_MODER_MODE1_1);
 	led_reset(led);
@@ -31,7 +31,6 @@ void led_enable_kalive(LED_t *l) {
 		else
 			sys_rp_led_on();
 	}
-
 }
 void led_i2c_toggle(LED_t *l) {
 	if (READ_BIT(GPIOB->ODR, GPIO_ODR_OD1))

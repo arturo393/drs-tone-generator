@@ -42,7 +42,7 @@ void uart1_gpio_init() {
 	CLEAR_BIT(GPIOA->AFR[1], GPIO_AFRH_AFSEL9_3);
 }
 
-void uart1_init(uint32_t pclk, uint32_t baud_rate, UART1_t *u) {
+void uart1Init(uint32_t pclk, uint32_t baud_rate, UART1_t *u) {
 	uint32_t br_value = 0;
 
 	uart1_gpio_init();
@@ -60,7 +60,7 @@ void uart1_init(uint32_t pclk, uint32_t baud_rate, UART1_t *u) {
 	USART1->BRR = (uint16_t) br_value;
 	/* transmitter enable*/
 	USART1->CR1 = USART_CR1_TE | USART_CR1_RE;
-	u->rx_count = 0;
+	u->rxCount = 0;
 
 	uart1_clean_buffer(u);
 
@@ -136,11 +136,11 @@ uint8_t uart1_1byte_read(void) {
 }
 
 void  uart1_read_to_frame(UART1_t *u) {
-	if (u->rx_count >= RX_BUFFLEN) {
+	if (u->rxCount >= RX_BUFFLEN) {
 		uart1_clean_buffer(u);
-		u->rx_count = 0;
+		u->rxCount = 0;
 	}
-	u->rx_buffer[u->rx_count++] = uart1_1byte_read();
+	u->rxBuffer[u->rxCount++] = uart1_1byte_read();
 }
 
 void uart1_send_str(char *str) {
@@ -160,18 +160,18 @@ void uart1_send_frame(char *str, uint8_t len) {
 }
 
 void uart1_clean_buffer(UART1_t *u) {
-	u->rx_count = 0;
+	u->rxCount = 0;
 	if (TX_BUFFLEN > RX_BUFFLEN) {
 		for (int i = 0; i < TX_BUFFLEN; i++) {
 			if (i < RX_BUFFLEN)
-				u->rx_buffer[i] = 0x00;
-			u->tx_buffer[i] = 0x00;
+				u->rxBuffer[i] = 0x00;
+			u->txBuffer[i] = 0x00;
 		}
 	} else {
 		for (int i = 0; i < RX_BUFFLEN; i++) {
 			if (i < TX_BUFFLEN)
-				u->tx_buffer[i] = 0x00;
-			u->rx_buffer[i] = 0x00;
+				u->txBuffer[i] = 0x00;
+			u->rxBuffer[i] = 0x00;
 		}
 	}
 }

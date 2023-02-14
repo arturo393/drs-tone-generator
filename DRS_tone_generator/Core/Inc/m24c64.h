@@ -59,7 +59,7 @@ void m24c64ReadNBytes(uint8_t page, uint8_t *data, uint8_t offset,uint8_t size);
 void m24c64WriteNBytes(uint8_t page, uint8_t *data, uint8_t offset,uint8_t size);
 void m24c64_init_16uvalue(M24C64_ADDR_t addr,uint16_t value);
 void m24c64_store_16uvalue(M24C64_ADDR_t addr,uint16_t value);
-
+unsigned long getULFromEeprom(uint8_t page);
 
 
 #ifdef __cplusplus

@@ -94,11 +94,12 @@ unsigned long getRegister4InitValue(MAX2871_t *ppl) {
 								 //(01 = -1dBm)
 								 //(10 = +2dBm)
 								 //(11 = +5dBm)
+	ppl->register4.DIVA = 0x0UL;
 	ppl->register4.ADDR4 = 0x4UL;  // Register address bits
 
 	return ppl->register4.RES << 29 | ppl->register4.SDLDO << 28
 			| ppl->register4.SDDIV << 27 | ppl->register4.SDREF << 26
-			| ppl->register4.FB << 23 | ppl->DIVA << 20
+			| ppl->register4.FB << 23 | ppl->register4.DIVA << 20
 			| ppl->register4.BS << 12 | ppl->register4.SDVCO << 11
 			| ppl->register4.MTLD << 10 | ppl->register4.BDIV << 9
 			| ppl->register4.RFB_EN << 8 | ppl->register4.BPWR << 6
@@ -125,38 +126,15 @@ unsigned long getRegister5InitValue(MAX2871_t *ppl) {
 
 void max2871Init(MAX2871_t *ppl) {
 	// Composition of MAX2971 Registers
-
-	ppl->freqOutCurrent = -1;
-	ppl->freqOutRead;
-	ppl->freqOutNew;
-	ppl->FreqOutCh = 0x0UL;
-	ppl->DIVA = 0x0UL;
+	ppl->freqSumRead = 0x0UL;
+	ppl->freqOutCh = 0x0UL;
 	ppl->freqBase = 0x0UL;
-	ppl->FreqBaseCh = 0x0UL;
-	ppl->ON_OFF;
-	ppl->PdBmCh = 0x0UL;
-	ppl->lastReadTick = HAL_GetTick();
+	ppl->freqBaseCh = 0x0UL;
+	ppl->powerOutCh = 0x0UL;
 	ppl->freqOutUpdate = false;
 	ppl->freqBaseUpdate = false;
-	ppl->PdBmUpdate = false;
-
-	ppl->FreqOut = getFreqOutFromEeprom();
-	if ((ppl->FreqOut < FREQ_OUT_MIN) || (ppl->FreqOut > FREQ_OUT_MAX)) {
-		ppl->FreqOut = 145000000;
-	}
-	ppl->freqBase = getFreqBaseFromEeprom();
-	if ((ppl->freqBase < FREQ_BASE_MIN) || (ppl->freqBase > FREQ_BASE_MAX)) {
-		ppl->freqBase = 145000000;
-	}
-	ppl->register4.APWR = getPdBmFromEeprom();
-	if ((ppl->register4.APWR < 0) || (ppl->register4.APWR > 3)) {
-		ppl->register4.APWR = 0x2UL;
-	}
-	ppl->freqOutNew = getFreqOut(ppl->freqBase);
-	ppl->freqOutCurrent = ppl->freqOutNew;
-
-	ppl->freqOutNew = getFreqOut(ppl->freqBase);
-
+	ppl->powerOutUpdate = false;
+	ppl->lastFreqSumReadTick = HAL_GetTick();
 }
 
 void max2871Write(SPI_HandleTypeDef *hspi2, unsigned long data)
@@ -185,45 +163,45 @@ void max2871CalculateRegister0Values(MAX2871_t *ppl) // Calculates values of NDI
 	unsigned long FreqRef = 50000000.0;  // FreqRef * 5
 	unsigned long Resol = 4000.0;
 
-	if (ppl->FreqOut >= 3000000000) {
-		ppl->DIVA = 0;
-		ppl->register0.NDIV = ppl->FreqOut / FreqRef;
-		rest = ppl->FreqOut % FreqRef;
+	if (ppl->freqOut >= 3000000000) {
+		ppl->register4.DIVA = 0;
+		ppl->register0.NDIV = ppl->freqOut / FreqRef;
+		rest = ppl->freqOut % FreqRef;
 		ppl->register0.FRAC = rest / FreqRef * Resol;
-	} else if ((ppl->FreqOut < 3000000000) && (ppl->FreqOut >= 1500000000)) {
-		ppl->DIVA = 1;
-		ppl->register0.NDIV = ppl->FreqOut * 2 / FreqRef;
-		rest = ppl->FreqOut * 2 % FreqRef;
+	} else if ((ppl->freqOut < 3000000000) && (ppl->freqOut >= 1500000000)) {
+		ppl->register4.DIVA = 1;
+		ppl->register0.NDIV = ppl->freqOut * 2 / FreqRef;
+		rest = ppl->freqOut * 2 % FreqRef;
 		ppl->register0.FRAC = rest / FreqRef * Resol;
-	} else if ((ppl->FreqOut < 1500000000) && (ppl->FreqOut >= 750000000)) {
-		ppl->DIVA = 2;
-		ppl->register0.NDIV = ppl->FreqOut * 4 / FreqRef;
-		rest = ppl->FreqOut * 4 % FreqRef;
+	} else if ((ppl->freqOut < 1500000000) && (ppl->freqOut >= 750000000)) {
+		ppl->register4.DIVA = 2;
+		ppl->register0.NDIV = ppl->freqOut * 4 / FreqRef;
+		rest = ppl->freqOut * 4 % FreqRef;
 		ppl->register0.FRAC = rest / FreqRef * Resol;
-	} else if ((ppl->FreqOut < 750000000) && (ppl->FreqOut >= 375000000)) {
-		ppl->DIVA = 3;
-		ppl->register0.NDIV = ppl->FreqOut * 8 / FreqRef;
-		rest = ppl->FreqOut * 8 % FreqRef;
+	} else if ((ppl->freqOut < 750000000) && (ppl->freqOut >= 375000000)) {
+		ppl->register4.DIVA = 3;
+		ppl->register0.NDIV = ppl->freqOut * 8 / FreqRef;
+		rest = ppl->freqOut * 8 % FreqRef;
 		ppl->register0.FRAC = rest / FreqRef * Resol;
-	} else if ((ppl->FreqOut < 375000000) && (ppl->FreqOut >= 187500000)) {
-		ppl->DIVA = 4;
-		ppl->register0.NDIV = ppl->FreqOut * 16 / FreqRef;
-		rest = ppl->FreqOut * 16 % FreqRef;
+	} else if ((ppl->freqOut < 375000000) && (ppl->freqOut >= 187500000)) {
+		ppl->register4.DIVA = 4;
+		ppl->register0.NDIV = ppl->freqOut * 16 / FreqRef;
+		rest = ppl->freqOut * 16 % FreqRef;
 		ppl->register0.FRAC = rest / FreqRef * Resol;
-	} else if ((ppl->FreqOut < 187500000) && (ppl->FreqOut >= 93750000)) {
-		ppl->DIVA = 5;
-		ppl->register0.NDIV = ppl->FreqOut * 32 / FreqRef;
-		rest = ppl->FreqOut * 32 % FreqRef;
+	} else if ((ppl->freqOut < 187500000) && (ppl->freqOut >= 93750000)) {
+		ppl->register4.DIVA = 5;
+		ppl->register0.NDIV = ppl->freqOut * 32 / FreqRef;
+		rest = ppl->freqOut * 32 % FreqRef;
 		ppl->register0.FRAC = rest / FreqRef * Resol;
-	} else if ((ppl->FreqOut < 93750000) && (ppl->FreqOut >= 46875000)) {
-		ppl->DIVA = 6;
-		ppl->register0.NDIV = ppl->FreqOut * 64 / FreqRef;
-		rest = ppl->FreqOut * 64 % FreqRef;
+	} else if ((ppl->freqOut < 93750000) && (ppl->freqOut >= 46875000)) {
+		ppl->register4.DIVA = 6;
+		ppl->register0.NDIV = ppl->freqOut * 64 / FreqRef;
+		rest = ppl->freqOut * 64 % FreqRef;
 		ppl->register0.FRAC = rest / FreqRef * Resol;
 	} else {
-		ppl->DIVA = 7;
-		ppl->register0.NDIV = ppl->FreqOut * 128 / FreqRef;
-		rest = ppl->FreqOut * 128 % FreqRef;
+		ppl->register4.DIVA = 7;
+		ppl->register0.NDIV = ppl->freqOut * 128 / FreqRef;
+		rest = ppl->freqOut * 128 % FreqRef;
 		ppl->register0.FRAC = rest / FreqRef * Resol;
 	}
 }
@@ -252,27 +230,34 @@ void waitForLock() {
 	}
 }
 
-void max2871Program(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) // Compose register value of register 0 and 4
-{
-
-	unsigned long composedRegisterValue;
-	max2871CalculateRegister0Values(ppl);
-
-	composedRegisterValue = ppl->register0.INT << 31 | ppl->register0.NDIV << 15
+void writeRegister0(MAX2871_t *ppl, SPI_HandleTypeDef *hspi2) {
+	unsigned long registerValue;
+	registerValue = ppl->register0.INT << 31 | ppl->register0.NDIV << 15
 			| ppl->register0.FRAC << 3 | ppl->register0.ADDR0;
+	max2871Write(hspi2, registerValue);
+}
 
-	max2871Write(hspi2, composedRegisterValue);
+void writeRegister4(MAX2871_t *ppl, SPI_HandleTypeDef *hspi2) {
+	unsigned long registerValue = 0;
+	registerValue = ppl->register4.RES << 29 | ppl->register4.SDLDO << 28
+			| ppl->register4.SDDIV << 27 | ppl->register4.SDREF << 26
+			| ppl->register4.FB << 23 | ppl->register4.DIVA << 20
+			| ppl->register4.BS << 12 | ppl->register4.SDVCO << 11
+			| ppl->register4.MTLD << 10 | ppl->register4.BDIV << 9
+			| ppl->register4.RFB_EN << 8 | ppl->register4.BPWR << 6
+			| ppl->register4.RFA_EN << 5 | ppl->register4.APWR << 3
+			| ppl->register4.ADDR4;
+	max2871Write(hspi2, registerValue);
+}
 
+void max2871ProgramFreqOut(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) // Compose register value of register 0 and 4
+{
+	double rest;
+	ppl->register0.NDIV = ppl->freqOut * 32 / (unsigned long) FREQ_REF;
+	rest = ppl->freqOut * 32 % (unsigned long) FREQ_REF;
+	ppl->register0.FRAC = rest / (unsigned long) FREQ_REF * RESOLUTION;
+	writeRegister0(ppl, hspi2);
 	waitForLock();
-
-	composedRegisterValue = ppl->register4.RES << 29
-			| ppl->register4.SDLDO << 28 | ppl->register4.SDDIV << 27
-			| ppl->register4.SDREF << 26 | ppl->register4.FB << 23
-			| ppl->DIVA << 20 | ppl->register4.BS << 12
-			| ppl->register4.SDVCO << 11 | ppl->register4.MTLD << 10
-			| ppl->register4.BDIV << 9 | ppl->register4.RFB_EN << 8
-			| ppl->register4.BPWR << 6 | ppl->register4.RFA_EN << 5
-			| ppl->register4.APWR << 3 | ppl->register4.ADDR4;
-
-	max2871Write(hspi2, composedRegisterValue);
+	ppl->register4.DIVA = 5;
+	writeRegister4(ppl, hspi2);
 }

@@ -6,7 +6,7 @@
  */
 #include "led.h"
 
-void led_init(LED_t *led) {
+void ledInit(LED_t *led) {
 	/*CURRENT NORMAL LED PA7 (A)*/
 	SET_BIT(GPIOA->MODER, GPIO_MODER_MODE7_0);
 	CLEAR_BIT(GPIOA->MODER, GPIO_MODER_MODE7_1);
@@ -23,13 +23,13 @@ void led_off(void) {
 }
 
 void led_enable_kalive(LED_t *l) {
-	if (HAL_GetTick() - l->ka_counter > LED_KA_STATE_TIMEOUT)
-		l->ka_counter = HAL_GetTick();
+	if (HAL_GetTick() - l->kaCounter > LED_KA_STATE_TIMEOUT)
+		l->kaCounter = HAL_GetTick();
 	else {
-		if (HAL_GetTick() - l->ka_counter > LED_KA_ON_TIMEOUT)
-			sys_rp_led_off();
+		if (HAL_GetTick() - l->kaCounter > LED_KA_ON_TIMEOUT)
+			SYS_RP_LED_OFF();
 		else
-			sys_rp_led_on();
+			SYS_RP_LED_ON();
 	}
 }
 void led_i2c_toggle(LED_t *l) {
@@ -40,12 +40,12 @@ void led_i2c_toggle(LED_t *l) {
 }
 
 void led_reset(LED_t *l) {
-	l->ch_counter = 0;
-	l->cl_counter = 0;
-	l->cn_counter = 0;
-	l->ka_counter = HAL_GetTick();
-	l->sysrp_counter = 0;
-	l->th_counter = 0;
-	l->tok_counter = 0;
+	l->chCounter = 0;
+	l->clCounter = 0;
+	l->cnCounter = 0;
+	l->kaCounter = HAL_GetTick();
+	l->sysrpCounter = 0;
+	l->thCounter = 0;
+	l->tokCounter = 0;
 }
 

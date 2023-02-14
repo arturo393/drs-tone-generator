@@ -59,3 +59,14 @@ void m24c64_store_16uvalue(M24C64_ADDR_t addr, uint16_t value) {
 	m24c64WriteNBytes(BASE_ADDR, buff, addr, 1);
 }
 
+unsigned long getULFromEeprom(uint8_t page) {
+	//uint8_t size = sizeof(unsigned long);
+	uint8_t buffer[4] = {0};
+	unsigned long readValue = 0;
+	m24c64ReadNBytes(page, buffer, 0, 4);
+	for (int i = 0; i < 4; i++) {
+		readValue |= (buffer[i] << ((i) * 8));
+	}
+	return readValue;
+}
+

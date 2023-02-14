@@ -25,11 +25,10 @@ uint16_t crc_get(uint8_t *buffer, uint8_t buff_len) {
 	return crc;
 }
 
-void rs485_init(RS485_t *r) {
+void rs485Init(RS485_t *r) {
 	r->len = 0;
 	r->status = DONE;
 	r->cmd = NONE;
-
 	/* PB9 DE485 as output  */
 	SET_BIT(GPIOB->MODER, GPIO_MODER_MODE9_0);
 	CLEAR_BIT(GPIOB->MODER, GPIO_MODER_MODE9_1);
@@ -37,9 +36,9 @@ void rs485_init(RS485_t *r) {
 }
 Rs485_status_t rs485_check_frame(RS485_t *r, UART1_t *u) {
 
-	if (u->rx_count > (MINIMUN_FRAME_LEN)) {
-		if (u->rx_buffer[0] == LTEL_START_MARK) {
-			if (u->rx_buffer[u->rx_count - 1] == LTEL_END_MARK)
+	if (u->rxCount > (MINIMUN_FRAME_LEN)) {
+		if (u->rxBuffer[0] == LTEL_START_MARK) {
+			if (u->rxBuffer[u->rxCount - 1] == LTEL_END_MARK)
 				return VALID_FRAME;
 			else
 				return START_READING;
@@ -53,19 +52,19 @@ Rs485_status_t rs485_check_frame(RS485_t *r, UART1_t *u) {
 Rs485_status_t rs485_check_CRC_module(UART1_t *uart1) {
 	unsigned long crc_cal;
 	unsigned long crc_save;
-	crc_save = uart1->rx_buffer[8] << 8;
-	crc_save |= uart1->rx_buffer[9];
-	crc_cal = crc_get(&(uart1->rx_buffer[1]), 7);
+	crc_save = uart1->rxBuffer[8] << 8;
+	crc_save |= uart1->rxBuffer[9];
+	crc_cal = crc_get(&(uart1->rxBuffer[1]), 7);
 	if (crc_cal == crc_save)
 		return DATA_OK;
 	return CRC_ERROR;
 }
 
 Rs485_status_t rs485_check_valid_module(UART1_t *uart1) {
-	if (uart1->rx_buffer[1] == UHF_TONE) {
-		if (uart1->rx_buffer[2] == ID0) {
-			for (int i = 3; i < uart1->rx_count; i++)
-				if (uart1->rx_buffer[i] == LTEL_END_MARK)
+	if (uart1->rxBuffer[1] == UHF_TONE) {
+		if (uart1->rxBuffer[2] == ID0) {
+			for (int i = 3; i < uart1->rxCount; i++)
+				if (uart1->rxBuffer[i] == LTEL_END_MARK)
 					return VALID_MODULE;
 		} else
 			return WRONG_MODULE_ID;
@@ -153,13 +152,13 @@ void rs485_parameters_cmd_action(uint8_t *frame) {
 
 }
 
-void rs485_update_status_by_uart(RS485_t *rs485, UART1_t *uart1) {
+void rs485Uart1Decode(RS485_t *rs485, UART1_t *uart1) {
 	switch (rs485->status) {
 	case VALID_MODULE:
 		rs485->status = rs485_check_CRC_module(uart1);
 		break;
 	case DATA_OK:
-		rs485->cmd = uart1->rx_buffer[3];
+		rs485->cmd = uart1->rxBuffer[3];
 		uart1_send_str("DATA OK\r\n");
 		rs485->status = DONE;
 		break;
@@ -183,7 +182,7 @@ void rs485_update_status_by_uart(RS485_t *rs485, UART1_t *uart1) {
 		rs485->status = DONE;
 		break;
 	case WRONG_MODULE_FUNCTION:
-		uart1_send_str("WRONG FUNCTION\r\n");
+		uart1_send_str("WRONG MODULE FUNCTION\r\n");
 		uart1_clean_buffer(uart1);
 		rs485->status = DONE;
 		break;

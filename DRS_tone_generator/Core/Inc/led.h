@@ -16,26 +16,26 @@
 #define LED_MAX_CURRENT 600
 #define LED_MIN_CURRENT 100
 #define LED_MAX_TEMPERATURE 75
-#define sys_rp_led_on() SET_BIT(GPIOB->ODR,GPIO_ODR_OD1)
-#define sys_rp_led_off() CLEAR_BIT(GPIOB->ODR,GPIO_ODR_OD1)
+#define SYS_RP_LED_ON() SET_BIT(GPIOB->ODR,GPIO_ODR_OD1)
+#define SYS_RP_LED_OFF() CLEAR_BIT(GPIOB->ODR,GPIO_ODR_OD1)
 
-#define Change_end_on_led() SET_BIT(GPIOA->ODR,GPIO_ODR_OD7)
-#define Change_end_off_led() CLEAR_BIT(GPIOA->ODR,GPIO_ODR_OD7)
+#define CHANGE_END_ON_LED() SET_BIT(GPIOA->ODR,GPIO_ODR_OD7)
+#define CHANGE_END_OFF_LED() CLEAR_BIT(GPIOA->ODR,GPIO_ODR_OD7)
 
-#define Freq_changing_on_led() SET_BIT(GPIOB->ODR,GPIO_ODR_OD0)
-#define Freq_changing_off_led() CLEAR_BIT(GPIOB->ODR,GPIO_ODR_OD0)
+#define FREQ_CHANGING_ON_LED() SET_BIT(GPIOB->ODR,GPIO_ODR_OD0)
+#define FREQ_CHANGING_OFF_LED() CLEAR_BIT(GPIOB->ODR,GPIO_ODR_OD0)
 
 typedef struct LED{
-	uint32_t ka_counter;
-	uint32_t cl_counter;
-	uint32_t cn_counter;
-	uint32_t ch_counter;
-	uint32_t sysrp_counter;
-	uint32_t tok_counter;
-	uint32_t th_counter;
+	uint32_t kaCounter;
+	uint32_t clCounter;
+	uint32_t cnCounter;
+	uint32_t chCounter;
+	uint32_t sysrpCounter;
+	uint32_t tokCounter;
+	uint32_t thCounter;
 }LED_t;
 
-void led_init(LED_t *led);
+void ledInit(LED_t *led);
 void led_off(void);
 void led_enable_kalive(LED_t *l);
 void led_reset(LED_t *l);

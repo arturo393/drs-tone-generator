@@ -18,14 +18,14 @@
 #define SECONDS(x) x*1000
 
 typedef struct UART1 {
-	uint8_t rx_buffer[RX_BUFFLEN];
-	uint8_t tx_buffer[TX_BUFFLEN];
-	uint8_t rx_count;
+	uint8_t rxBuffer[RX_BUFFLEN];
+	uint8_t txBuffer[TX_BUFFLEN];
+	uint8_t rxCount;
 	uint32_t timeout;
 } UART1_t;
 
 uint8_t  uart1_clean_by_timeout(UART1_t* uart1,const char* str);
-void uart1_init(uint32_t, uint32_t, UART1_t*);
+void uart1Init(uint32_t, uint32_t, UART1_t*);
 void uart1_write(volatile char);
 void uart1_send_str( char*);
 void uart1_send_frame(char*, uint8_t);

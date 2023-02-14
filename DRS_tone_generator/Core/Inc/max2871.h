@@ -19,6 +19,10 @@
 #define FREQ_BASE_MAX 148412500UL
 #define FREQ_OUT_MIN 142500000UL
 #define FREQ_OUT_MAX 161200000UL
+#define FREQ_BASE_DEFAULT 145000000
+#define FREQ_REF 50000000.0
+#define RESOLUTION 4000.0
+
 
 typedef struct REGISTER0 {
 	//Register 0
@@ -80,6 +84,7 @@ typedef struct REGISTER4 {
 	unsigned long SDDIV;
 	unsigned long SDREF;
 	unsigned long FB;
+	unsigned long DIVA;
 	unsigned long BS;
 	unsigned long SDVCO;
 	unsigned long MTLD;
@@ -106,20 +111,18 @@ typedef struct REGISTER5 {
 
 typedef struct MAX2871 {
 
-	unsigned long long FreqOut;
-	unsigned long freqOutCurrent;
-	unsigned long freqOutRead;
-	unsigned long freqOutNew;
-	unsigned long FreqOutCh;
-	unsigned long DIVA;
+	unsigned long long freqOut;
+	unsigned long freqSumCurrent;
+	unsigned long freqSumRead;
+	unsigned long freqSumNew;
+	unsigned long freqOutCh;
 	unsigned long freqBase;
-	unsigned long FreqBaseCh;
-	unsigned long ON_OFF; // TODO : Este comando muere
-	unsigned long PdBmCh;
-	unsigned long lastReadTick;
+	unsigned long freqBaseCh;
+	unsigned long powerOutCh;
+	unsigned long lastFreqSumReadTick;
     bool freqOutUpdate;
 	bool freqBaseUpdate;
-	bool PdBmUpdate;
+	bool powerOutUpdate;
 
 	REGISTER0_t register0;
 	REGISTER1_t register1;
@@ -133,5 +136,6 @@ void max2871Init();
 void max2871CalculateRegister0Values(MAX2871_t *ppl); // Calculates values of NDIV, FRAC & DIVA
 void max2871RegisterInit(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl);
 void max2871Write(SPI_HandleTypeDef *hspi2, unsigned long data);
-void max2871Program(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl);
+void max2871ProgramFreqOut(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl);
+
 #endif /* INC_MAX2871_H_ */

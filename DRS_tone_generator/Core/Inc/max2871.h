@@ -112,14 +112,11 @@ typedef struct REGISTER5 {
 typedef struct MAX2871 {
 
 	unsigned long long freqOut;
-	unsigned long freqSumCurrent;
-	unsigned long freqSumRead;
-	unsigned long freqSumNew;
-	unsigned long freqOutCh;
-	unsigned long freqBase;
-	unsigned long freqBaseCh;
-	unsigned long powerOutCh;
-	unsigned long lastFreqSumReadTick;
+	unsigned long long freqSumCurrent;
+	unsigned long long freqSumRead;
+	unsigned long long freqSumNew;
+	unsigned long long freqBase;
+	unsigned long long lastFreqSumReadTick;
     bool freqOutUpdate;
 	bool freqBaseUpdate;
 	bool powerOutUpdate;

@@ -127,10 +127,7 @@ unsigned long getRegister5InitValue(MAX2871_t *ppl) {
 void max2871Init(MAX2871_t *ppl) {
 	// Composition of MAX2971 Registers
 	ppl->freqSumRead = 0x0UL;
-	ppl->freqOutCh = 0x0UL;
 	ppl->freqBase = 0x0UL;
-	ppl->freqBaseCh = 0x0UL;
-	ppl->powerOutCh = 0x0UL;
 	ppl->freqOutUpdate = false;
 	ppl->freqBaseUpdate = false;
 	ppl->powerOutUpdate = false;
@@ -222,7 +219,7 @@ void max2871RegisterInit(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) {
 void waitForLock() {
 	GPIO_PinState lock = GPIO_PIN_SET;
 	unsigned long t_ini = HAL_GetTick();
-	unsigned long test;
+	unsigned long test = 0;
 	while (lock == GPIO_PIN_SET && (test < 2000)) {
 		test = HAL_GetTick() - t_ini;
 		lock = HAL_GPIO_ReadPin(MAX_LOCK_DETECTOR_GPIO_Port,
@@ -253,11 +250,16 @@ void writeRegister4(MAX2871_t *ppl, SPI_HandleTypeDef *hspi2) {
 void max2871ProgramFreqOut(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) // Compose register value of register 0 and 4
 {
 	double rest;
-	ppl->register0.NDIV = ppl->freqOut * 32 / (unsigned long) FREQ_REF;
-	rest = ppl->freqOut * 32 % (unsigned long) FREQ_REF;
-	ppl->register0.FRAC = rest / (unsigned long) FREQ_REF * RESOLUTION;
-	writeRegister0(ppl, hspi2);
-	waitForLock();
-	ppl->register4.DIVA = 5;
-	writeRegister4(ppl, hspi2);
+	    HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
+		//ppl->register4.RFA_EN = 0x0UL;
+		writeRegister4(ppl, hspi2);
+		ppl->register0.NDIV = ppl->freqOut * 32 / (unsigned long) FREQ_REF;
+		rest = ppl->freqOut * 32 % (unsigned long) FREQ_REF;
+		ppl->register0.FRAC = rest / (unsigned long) FREQ_REF * RESOLUTION;
+		writeRegister0(ppl, hspi2);
+		waitForLock();
+		ppl->register4.DIVA = 5;
+		//ppl->register4.RFA_EN = 0X1UL; // Enabled
+		writeRegister4(ppl, hspi2);
+		HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 }

@@ -35,7 +35,7 @@
 #define FREQ_STEP 12500
 #define HS16_CLK 16000000
 #define BAUD_RATE 115200
-#define SW_DEBOUNCE 100
+#define SW_DEBOUNCE 500
 
 /* USER CODE END PTD */
 
@@ -154,28 +154,28 @@ void powerOutCmdUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
 		//Power out -4dBm
 		ppl->register4.APWR = 0x0UL;
 		ppl->powerOutUpdate = true;
-		sprintf(uart1->txBuffer, "PdBm out = -4dBm \n");
+		sprintf(uart1->txBuffer, "PdBm out = -4[dBm] \n");
 		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
 	}
 	if (receiveValue == 1) {
 		//Power out -1dBm
 		ppl->register4.APWR = 0x1UL;
 		ppl->powerOutUpdate = true;
-		sprintf(uart1->txBuffer, "PdBm out = -1dBm \n");
+		sprintf(uart1->txBuffer, "PdBm out = -1[dBm] \n");
 		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
 	}
 	if (receiveValue == 2) {
 		//Power out +2dBm
 		ppl->register4.APWR = 0x2UL;
 		ppl->powerOutUpdate = true;
-		sprintf(uart1->txBuffer, "PdBm out = +2dBm \n");
+		sprintf(uart1->txBuffer, "PdBm out = +2[dBm] \n");
 		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
 	}
 	if (receiveValue == 3) {
 		//Power out +5dBm
 		ppl->register4.APWR = 0x3UL;
 		ppl->powerOutUpdate = true;
-		sprintf(uart1->txBuffer, "PdBm out = +5dBm \n");
+		sprintf(uart1->txBuffer, "PdBm out = +5[dBm] \n");
 		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
 	}
 }
@@ -204,21 +204,18 @@ void freqOutRs485Update(const UART1_t *uart1, RS485_t *rs485, MAX2871_t *ppl) {
 void freqOutSWUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
 
 	ppl->freqSumRead = getFreqSum(ppl->freqBase);
-
 	if (ppl->freqSumRead != ppl->freqSumNew) {
 		ppl->lastFreqSumReadTick = HAL_GetTick();
-		HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
 		FREQ_CHANGING_ON_LED();
 		ppl->freqSumNew = ppl->freqSumRead;
 	}
 
 	if ((HAL_GetTick() - ppl->lastFreqSumReadTick) > SW_DEBOUNCE) {
 		if (ppl->freqSumNew != ppl->freqSumCurrent) {
-			ppl->freqOut = ppl->freqSumRead + ppl->freqBase;
+			ppl->freqOut = ppl->freqSumNew + ppl->freqBase;
 			sprintf(uart1->txBuffer, "New Frequency Out: %u\n", ppl->freqOut);
 			uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
 			ppl->freqOutUpdate = true;
-			HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 			FREQ_CHANGING_OFF_LED();
 			ppl->freqSumCurrent = ppl->freqSumNew;
 		}
@@ -287,7 +284,7 @@ int main(void) {
 	}
 	ppl.register4.APWR = getULFromEeprom(POUT_ADDR);
 	if ((ppl.register4.APWR < 0x0UL) || (ppl.register4.APWR > 0x3UL)) {
-		ppl.register4.APWR = 0x2UL;
+		ppl.register4.APWR = 0x0UL;
 	}
 	ppl.freqSumNew = getFreqSum(ppl.freqBase);
 	ppl.freqSumRead = ppl.freqSumNew;

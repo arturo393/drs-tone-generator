@@ -50,7 +50,6 @@ typedef struct PA_MODULE {
 	bool calc_en;
 }  Module_pa_t;
 
-//TODO agregar variables de la placa de tono
 typedef struct TONE_UHF_MODULE {
 	unsigned long FreqOut;
 	unsigned long FreqBase;

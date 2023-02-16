@@ -287,7 +287,7 @@ int main(void)
 	}
 	ppl.register4.APWR = getULFromEeprom(POUT_ADDR);
 	if ((ppl.register4.APWR < 0x0UL) || (ppl.register4.APWR > 0x3UL)) {
-		ppl.register4.APWR = 0x0UL;
+		ppl.register4.APWR = 0x1UL;
 	}
 	ppl.freqSumNew = getFreqSum(ppl.freqBase);
 	ppl.freqSumRead = ppl.freqSumNew;

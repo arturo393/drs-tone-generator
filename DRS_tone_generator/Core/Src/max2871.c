@@ -90,7 +90,7 @@ unsigned long getRegister4InitValue(MAX2871_t *ppl) {
 	ppl->register4.RFB_EN = 0x0UL; // RFOUTB disabled
 	ppl->register4.BPWR = 0x3UL;   // RFOUTB  5 dBm
 	ppl->register4.RFA_EN = 0x1UL; // RFOUTA enabled
-	ppl->register4.APWR = 0x0UL; // Sets RFOUTA single-ended output power   (00 = -4dBm)
+	ppl->register4.APWR = 0x1UL; // Sets RFOUTA single-ended output power   (00 = -4dBm)
 								 //(01 = -1dBm)
 								 //(10 = +2dBm)
 								 //(11 = +5dBm)

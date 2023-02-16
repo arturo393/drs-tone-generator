@@ -28,6 +28,7 @@ Core/Src/max2871.o: ../Core/Src/max2871.c ../Core/Inc/max2871.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_flash_ex.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_i2c.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_i2c_ex.h \
+ ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_iwdg.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr_ex.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_spi.h \
@@ -65,6 +66,7 @@ Core/Src/max2871.o: ../Core/Src/max2871.c ../Core/Inc/max2871.h \
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_flash_ex.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_i2c.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_i2c_ex.h:
+../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_iwdg.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr_ex.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_spi.h:

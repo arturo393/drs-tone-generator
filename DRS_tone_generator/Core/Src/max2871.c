@@ -90,7 +90,7 @@ unsigned long getRegister4InitValue(MAX2871_t *ppl) {
 	ppl->register4.RFB_EN = 0x0UL; // RFOUTB disabled
 	ppl->register4.BPWR = 0x3UL;   // RFOUTB  5 dBm
 	ppl->register4.RFA_EN = 0x1UL; // RFOUTA enabled
-	ppl->register4.APWR = 0x2UL; // Sets RFOUTA single-ended output power   (00 = -4dBm)
+	ppl->register4.APWR = 0x0UL; // Sets RFOUTA single-ended output power   (00 = -4dBm)
 								 //(01 = -1dBm)
 								 //(10 = +2dBm)
 								 //(11 = +5dBm)
@@ -129,8 +129,6 @@ void max2871Init(MAX2871_t *ppl) {
 	ppl->freqSumRead = 0x0UL;
 	ppl->freqBase = 0x0UL;
 	ppl->freqOutUpdate = false;
-	ppl->freqBaseUpdate = false;
-	ppl->powerOutUpdate = false;
 	ppl->lastFreqSumReadTick = HAL_GetTick();
 }
 
@@ -250,16 +248,16 @@ void writeRegister4(MAX2871_t *ppl, SPI_HandleTypeDef *hspi2) {
 void max2871ProgramFreqOut(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) // Compose register value of register 0 and 4
 {
 	double rest;
-	    HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
-		//ppl->register4.RFA_EN = 0x0UL;
-		writeRegister4(ppl, hspi2);
-		ppl->register0.NDIV = ppl->freqOut * 32 / (unsigned long) FREQ_REF;
-		rest = ppl->freqOut * 32 % (unsigned long) FREQ_REF;
-		ppl->register0.FRAC = rest / (unsigned long) FREQ_REF * RESOLUTION;
-		writeRegister0(ppl, hspi2);
-		waitForLock();
-		ppl->register4.DIVA = 5;
-		//ppl->register4.RFA_EN = 0X1UL; // Enabled
-		writeRegister4(ppl, hspi2);
-		HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
+	ppl->register4.RFA_EN = 0x0UL; // Disabled
+	writeRegister4(ppl, hspi2);
+	ppl->register0.NDIV = ppl->freqOut * 32 / (unsigned long) FREQ_REF;
+	rest = ppl->freqOut * 32 % (unsigned long) FREQ_REF;
+	ppl->register0.FRAC = rest / (unsigned long) FREQ_REF * RESOLUTION;
+	writeRegister0(ppl, hspi2);
+	waitForLock();
+	ppl->register4.DIVA = 5;
+	ppl->register4.RFA_EN = 0X1UL; // Enabled
+	writeRegister4(ppl, hspi2);
+	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 }

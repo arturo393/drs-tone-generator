@@ -1,6 +1,10 @@
-../Core/Src/main.c:78:6:getFreqOutFromEeprom	16	static
-../Core/Src/main.c:84:15:getFreqOut	24	static
-../Core/Src/main.c:100:6:USART1_IRQHandler	8	static
-../Core/Src/main.c:202:6:SystemClock_Config	80	static,ignoring_inline_asm
-../Core/Src/main.c:110:5:main	336	static,ignoring_inline_asm
-../Core/Src/main.c:461:6:Error_Handler	0	static,ignoring_inline_asm
+../Core/Src/main.c:84:15:getFreqSum	24	static
+../Core/Src/main.c:107:6:USART1_IRQHandler	8	static
+../Core/Src/main.c:111:6:freqOutCmdUpdate	16	static
+../Core/Src/main.c:129:6:freqBaseCmdUpdate	24	static
+../Core/Src/main.c:148:6:powerOutCmdUpdate	8	static
+../Core/Src/main.c:185:6:freqOutRs485Update	16	static
+../Core/Src/main.c:206:6:freqOutSWUpdate	16	static
+../Core/Src/main.c:330:6:SystemClock_Config	80	static,ignoring_inline_asm
+../Core/Src/main.c:233:5:main	496	static,ignoring_inline_asm
+../Core/Src/main.c:632:6:Error_Handler	0	static,ignoring_inline_asm

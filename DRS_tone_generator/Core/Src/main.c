@@ -145,6 +145,45 @@ void freqBaseCmdUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
 	}
 }
 
+void printParameters(const UART1_t *uart1, MAX2871_t *ppl) {
+	if (ppl->register4.APWR == 0) {
+		sprintf((char*) uart1->txBuffer,
+				"Frequency: %lu\nBase Frequency: %lu\nPower out: -4 [dBm]\n",
+				ppl->freqOut, ppl->freqBase);
+		uart1_send_frame((uint8_t*) uart1->txBuffer, TX_BUFFLEN);
+	}
+	if (ppl->register4.APWR == 1) {
+		sprintf((char*) uart1->txBuffer,
+				"Frequency: %lu\nBase Frequency: %lu\nPower out: -1 [dBm]\n",
+				ppl->freqOut, ppl->freqBase);
+		uart1_send_frame((uint8_t*) uart1->txBuffer, TX_BUFFLEN);
+	}
+	if (ppl->register4.APWR == 2) {
+		sprintf((char*) uart1->txBuffer,
+				"Frequency: %lu\nBase Frequency: %lu\nPower out: +2 [dBm]\n",
+				ppl->freqOut, ppl->freqBase);
+		uart1_send_frame((uint8_t*) uart1->txBuffer, TX_BUFFLEN);
+	}
+	if (ppl->register4.APWR == 3) {
+		sprintf((char*) uart1->txBuffer,
+				"Frequency: %lu\nBase Frequency: %lu\nPower out: +5 [dBm]\n",
+				ppl->freqOut, ppl->freqBase);
+		uart1_send_frame((uint8_t*) uart1->txBuffer, TX_BUFFLEN);
+	}
+}
+
+void ParametersCmd(const UART1_t *uart1, MAX2871_t *ppl) {
+	unsigned long receiveValue;
+	receiveValue = 0;
+	receiveValue = uart1->rxBuffer[4] << 24;
+	receiveValue |= uart1->rxBuffer[5] << 16;
+	receiveValue |= uart1->rxBuffer[6] << 8;
+	receiveValue |= uart1->rxBuffer[7];
+	if (receiveValue == 0) {
+		printParameters(uart1, ppl);
+	}
+}
+
 void powerOutCmdUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
 	unsigned long receiveValue;
 	receiveValue = 0;
@@ -187,6 +226,10 @@ void freqOutRs485Update(const UART1_t *uart1, RS485_t *rs485, MAX2871_t *ppl) {
 	switch (rs485->cmd) {
 	case QUERY_PARAMETER_FREQOUT: //cmd = 31
 		freqOutCmdUpdate(uart1, ppl);
+		rs485->cmd = NONE;
+		break;
+	case QUERY_PARAMETERS: //cmd = 32
+		ParametersCmd(uart1, ppl);
 		rs485->cmd = NONE;
 		break;
 	case QUERY_PARAMETER_FREQBASE: //cmd = 33
@@ -264,7 +307,7 @@ int main(void)
   MX_SPI2_Init();
   //MX_USART1_UART_Init();
   MX_CRC_Init();
-  MX_IWDG_Init();
+ // MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
 	toneUhfInit(UHF_TONE, ID0, &uhf);
 	rs485Init(&rs485);
@@ -296,6 +339,8 @@ int main(void)
 	max2871ProgramFreqOut(&hspi2, &ppl);
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 
+	printParameters(&uart1, &ppl);
+
 	while (1) {
 
 		led_enable_kalive(&led);
@@ -315,7 +360,7 @@ int main(void)
 			m24c64WriteNBytes(POUT_ADDR, (uint8_t*) (&ppl.register4.APWR), 0,
 			FREQ_OUT_SIZE);
 		}
-	HAL_IWDG_Refresh(&hiwdg);
+//	HAL_IWDG_Refresh(&hiwdg);
 	}
     /* USER CODE END WHILE */
 

@@ -28,7 +28,7 @@ uint8_t  uart1_clean_by_timeout(UART1_t* uart1,const char* str);
 void uart1Init(uint32_t, uint32_t, UART1_t*);
 void uart1_write(volatile char);
 void uart1_send_str( char*);
-void uart1_send_frame(char*, uint8_t);
+void uart1_send_frame(uint8_t[], uint8_t);
 void uart1_read(char*, uint8_t);
 void uart1_read_test(char*, uint8_t);
 uint8_t uart1_1byte_read(void);

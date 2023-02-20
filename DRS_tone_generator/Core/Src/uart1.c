@@ -149,7 +149,7 @@ void uart1_send_str(char *str) {
 		uart1_write(str[i]);
 }
 
-void uart1_send_frame(char *str, uint8_t len) {
+void uart1_send_frame(uint8_t str[], uint8_t len) {
 
 	if (len > 0) {
 		for (int i = 0; i < len; i++){

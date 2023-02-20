@@ -24,8 +24,8 @@ void m24c64ReadNBytes(uint8_t page, uint8_t *data, uint8_t offset, uint8_t size)
 }
 
 void m24c64WriteNBytes(uint8_t page, uint8_t *data, uint8_t offset, uint8_t size) {
-	uint8_t buff[size + 1];
-	uint8_t read[size];
+	uint8_t buff[PAGE_SIZE + 1];
+	uint8_t read[PAGE_SIZE];
 
 	m24c64ReadNBytes(page, read, offset, size);
 

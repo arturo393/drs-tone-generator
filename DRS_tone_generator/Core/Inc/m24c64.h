@@ -45,7 +45,8 @@ extern "C" {
 typedef enum{
 	FREQ_OUT_ADDR = BASE_ADDR,
 	FREQ_BASE_ADDR,
-	POUT_ADDR
+	POUT_ADDR,
+	MODE_ADDR
 }M24C64_ADDR_t;
 
 

@@ -118,10 +118,7 @@ typedef struct MAX2871 {
 	unsigned long long freqBase;
 	unsigned long long lastFreqSumReadTick;
     bool freqOutUpdate;
-    unsigned long out;
-	unsigned long base;
-	unsigned long power;
-
+    unsigned long hibridMode;
 
 	REGISTER0_t register0;
 	REGISTER1_t register1;

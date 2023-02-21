@@ -5,10 +5,10 @@
 ../Core/Src/max2871.c:79:15:getRegister4InitValue	16	static
 ../Core/Src/max2871.c:110:15:getRegister5InitValue	16	static
 ../Core/Src/max2871.c:127:6:max2871Init	24	static
-../Core/Src/max2871.c:138:6:max2871Write	32	static
-../Core/Src/max2871.c:158:6:max2871CalculateRegister0Values	272	static
-../Core/Src/max2871.c:207:6:max2871RegisterInit	24	static
-../Core/Src/max2871.c:220:6:waitForLock	32	static
-../Core/Src/max2871.c:231:6:writeRegister0	24	static
-../Core/Src/max2871.c:238:6:writeRegister4	24	static
-../Core/Src/max2871.c:251:6:max2871ProgramFreqOut	40	static
+../Core/Src/max2871.c:136:6:max2871Write	32	static
+../Core/Src/max2871.c:156:6:max2871CalculateRegister0Values	272	static
+../Core/Src/max2871.c:205:6:max2871RegisterInit	24	static
+../Core/Src/max2871.c:218:6:waitForLock	32	static
+../Core/Src/max2871.c:229:6:writeRegister0	24	static
+../Core/Src/max2871.c:236:6:writeRegister4	24	static
+../Core/Src/max2871.c:249:6:max2871ProgramFreqOut	40	static

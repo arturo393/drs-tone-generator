@@ -32,7 +32,6 @@ void m24c64WriteNBytes(uint8_t page, uint8_t *data, uint8_t offset,
 	bool notEqual = false;
 
 	for (int i = 0; i < size; i++)
-
 		if (data[i] != read[i]) {
 			notEqual = true;
 			break;

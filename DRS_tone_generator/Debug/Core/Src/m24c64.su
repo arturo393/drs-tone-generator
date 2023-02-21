@@ -1,6 +1,6 @@
 ../Core/Src/m24c64.c:3:6:m24c64_page_read	24	static
 ../Core/Src/m24c64.c:14:6:m24c64ReadNBytes	32	static
 ../Core/Src/m24c64.c:26:6:m24c64WriteNBytes	56	static
-../Core/Src/m24c64.c:52:6:m24c64_init_16uvalue	32	static
-../Core/Src/m24c64.c:62:6:m24c64_store_16uvalue	32	static
-../Core/Src/m24c64.c:71:15:getULFromEeprom	32	static
+../Core/Src/m24c64.c:51:6:m24c64_init_16uvalue	32	static
+../Core/Src/m24c64.c:61:6:m24c64_store_16uvalue	32	static
+../Core/Src/m24c64.c:70:15:getULFromEeprom	32	static

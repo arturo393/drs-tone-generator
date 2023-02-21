@@ -23,13 +23,22 @@ void m24c64ReadNBytes(uint8_t page, uint8_t *data, uint8_t offset, uint8_t size)
 	i2c1MasterFrameRx(CHIP_ADDR, data, size);
 }
 
-void m24c64WriteNBytes(uint8_t page, uint8_t *data, uint8_t offset, uint8_t size) {
+void m24c64WriteNBytes(uint8_t page, uint8_t *data, uint8_t offset,
+		uint8_t size) {
 	uint8_t buff[PAGE_SIZE + 1];
 	uint8_t read[PAGE_SIZE];
 
 	m24c64ReadNBytes(page, read, offset, size);
+	bool notEqual = false;
 
-	if (strncmp((const char*) data, (const char*) read, (size_t) size)) {
+	for (int i = 0; i < size; i++)
+
+		if (data[i] != read[i]) {
+			notEqual = true;
+			break;
+		}
+
+	if (notEqual) {
 		//buff[0] = (page << PADDRPOSITION | offset) >> 8;
 		buff[0] = (page << PADDRPOSITION | offset) & 0xff;
 		for (int i = 0; i < size; i++) {
@@ -61,7 +70,7 @@ void m24c64_store_16uvalue(M24C64_ADDR_t addr, uint16_t value) {
 
 unsigned long getULFromEeprom(uint8_t page) {
 	//uint8_t size = sizeof(unsigned long);
-	uint8_t buffer[4] = {0};
+	uint8_t buffer[4] = { 0 };
 	unsigned long readValue = 0;
 	m24c64ReadNBytes(page, buffer, 0, 4);
 	for (int i = 0; i < 4; i++) {

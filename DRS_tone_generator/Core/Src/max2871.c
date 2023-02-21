@@ -130,6 +130,9 @@ void max2871Init(MAX2871_t *ppl) {
 	ppl->freqBase = 0x0UL;
 	ppl->freqOutUpdate = false;
 	ppl->lastFreqSumReadTick = HAL_GetTick();
+	ppl->out;
+	ppl->base;
+	ppl->power;
 }
 
 void max2871Write(SPI_HandleTypeDef *hspi2, unsigned long data)

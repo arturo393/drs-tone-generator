@@ -296,34 +296,40 @@ int main(void) {
 	MX_SPI2_Init();
 	//MX_USART1_UART_Init();
 	MX_CRC_Init();
-	MX_IWDG_Init();
+//	MX_IWDG_Init();
 	/* USER CODE BEGIN 2 */
 	toneUhfInit(UHF_TONE, ID0, &uhf);
 	rs485Init(&rs485);
 	ledInit(&led);
 	i2c1MasterInit();
 	uart1Init(HS16_CLK, BAUD_RATE, &uart1);
+
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	max2871Init(&ppl);
 	max2871RegisterInit(&hspi2, &ppl); //
-	ppl.freqOut = getULFromEeprom(FREQ_OUT_ADDR);
-	if ((ppl.freqOut < FREQ_OUT_MIN) || (ppl.freqOut > FREQ_OUT_MAX)) {
-		ppl.freqOut = 0;
-	}
+
+
+
 	ppl.freqBase = getULFromEeprom(FREQ_BASE_ADDR);
-	if ((ppl.freqBase < FREQ_BASE_MIN) || (ppl.freqBase > FREQ_BASE_MAX)) {
+	if ((ppl.freqBase < FREQ_BASE_MIN) || (ppl.freqBase > FREQ_BASE_MAX))
 		ppl.freqBase = FREQ_BASE_DEFAULT;
-	}
+
 	ppl.register4.APWR = getULFromEeprom(POUT_ADDR);
-	if ((ppl.register4.APWR < 0x0UL) || (ppl.register4.APWR > 0x3UL)) {
+	if ((ppl.register4.APWR < 0x0UL) || (ppl.register4.APWR > 0x3UL))
 		ppl.register4.APWR = 0x1UL;
-	}
+
 	ppl.freqSumNew = getFreqSum(ppl.freqBase);
 	ppl.freqSumRead = ppl.freqSumNew;
 	ppl.freqSumCurrent = ppl.freqSumNew;
+
+
+	ppl.freqOut = getULFromEeprom(FREQ_OUT_ADDR);
+	//ppl.freqOut = 444546545;
+	if ((ppl.freqOut < FREQ_OUT_MIN) || (ppl.freqOut > FREQ_OUT_MAX))
+		ppl.freqOut = FREQ_BASE_DEFAULT + ppl.freqSumCurrent;
 
 	max2871ProgramFreqOut(&hspi2, &ppl);
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
@@ -347,8 +353,13 @@ int main(void) {
 			FREQ_OUT_SIZE);
 			m24c64WriteNBytes(POUT_ADDR, (uint8_t*) (&ppl.register4.APWR), 0,
 			FREQ_OUT_SIZE);
+
+			HAL_Delay(100);
+			ppl.out = getULFromEeprom(FREQ_OUT_ADDR);
+			ppl.base = getULFromEeprom(FREQ_BASE_ADDR);
+			ppl.power = getULFromEeprom(POUT_ADDR);
 		}
-		HAL_IWDG_Refresh(&hiwdg);
+	//	HAL_IWDG_Refresh(&hiwdg);
 	}
 	/* USER CODE END WHILE */
 

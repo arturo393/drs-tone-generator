@@ -289,6 +289,40 @@ void freqOutSWUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
 	}
 }
 
+void getParametersFromEeprom(MAX2871_t *ppl) {
+	ppl->freqBase = getULFromEeprom(FREQ_BASE_ADDR);
+	if ((ppl->freqBase < FREQ_BASE_MIN) || (ppl->freqBase > FREQ_BASE_MAX))
+		ppl->freqBase = FREQ_BASE_DEFAULT;
+
+	ppl->register4.APWR = getULFromEeprom(POUT_ADDR);
+	if ((ppl->register4.APWR < 0x0UL) || (ppl->register4.APWR > 0x3UL))
+		ppl->register4.APWR = 0x1UL;
+
+	ppl->hibridMode = getULFromEeprom(MODE_ADDR);
+	if ((ppl->hibridMode < 0) || (ppl->hibridMode > 1))
+		ppl->hibridMode = 0;
+
+	ppl->freqSumNew = getFreqSum(ppl->freqBase);
+	ppl->freqSumRead = ppl->freqSumNew;
+	ppl->freqSumCurrent = ppl->freqSumNew;
+	ppl->freqOut = FREQ_BASE_DEFAULT + ppl->freqSumCurrent;
+	if (ppl->hibridMode == 1) {
+		HIBRID_MODE_ON_LED();
+		ppl->freqOut = getULFromEeprom(FREQ_OUT_ADDR);
+		if ((ppl->freqOut < FREQ_OUT_MIN) || (ppl->freqOut > FREQ_OUT_MAX))
+			ppl->freqOut = FREQ_BASE_DEFAULT + ppl->freqSumCurrent;
+	}
+}
+
+void saveParameters(MAX2871_t *ppl) {
+	m24c64WriteNBytes(FREQ_OUT_ADDR, (uint8_t*) (&ppl->freqOut), 0,
+			FREQ_OUT_SIZE);
+	m24c64WriteNBytes(FREQ_BASE_ADDR, (uint8_t*) (&ppl->freqBase), 0,
+			FREQ_OUT_SIZE);
+	m24c64WriteNBytes(POUT_ADDR, (uint8_t*) (&ppl->register4.APWR), 0,
+			FREQ_OUT_SIZE);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -335,46 +369,18 @@ int main(void) {
 	ledInit(&led);
 	i2c1MasterInit();
 	uart1Init(HS16_CLK, BAUD_RATE, &uart1);
-
+	max2871Init(&ppl);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-	max2871Init(&ppl);
 	max2871RegisterInit(&hspi2, &ppl); //
-
-	ppl.freqBase = getULFromEeprom(FREQ_BASE_ADDR);
-	if ((ppl.freqBase < FREQ_BASE_MIN) || (ppl.freqBase > FREQ_BASE_MAX))
-		ppl.freqBase = FREQ_BASE_DEFAULT;
-
-	ppl.register4.APWR = getULFromEeprom(POUT_ADDR);
-	if ((ppl.register4.APWR < 0x0UL) || (ppl.register4.APWR > 0x3UL))
-		ppl.register4.APWR = 0x1UL;
-
-	ppl.hibridMode = getULFromEeprom(MODE_ADDR);
-	if ((ppl.hibridMode < 0) || (ppl.hibridMode > 1))
-		ppl.hibridMode = 0;
-
-	ppl.freqSumNew = getFreqSum(ppl.freqBase);
-	ppl.freqSumRead = ppl.freqSumNew;
-	ppl.freqSumCurrent = ppl.freqSumNew;
-
-	ppl.freqOut = FREQ_BASE_DEFAULT + ppl.freqSumCurrent;
-
-	if (ppl.hibridMode == 1) {
-		HIBRID_MODE_ON_LED();
-		ppl.freqOut = getULFromEeprom(FREQ_OUT_ADDR);
-		if ((ppl.freqOut < FREQ_OUT_MIN) || (ppl.freqOut > FREQ_OUT_MAX))
-			ppl.freqOut = FREQ_BASE_DEFAULT + ppl.freqSumCurrent;
-	}
-
+	getParametersFromEeprom(&ppl);
 	max2871ProgramFreqOut(&hspi2, &ppl);
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 	printParameters(&uart1, &ppl);
 
 	while (1) {
-
-		led_enable_kalive(&led);
 
 		freqOutSWUpdate(&uart1, &ppl);
 		rs485Uart1Decode(&rs485, &uart1);
@@ -383,17 +389,11 @@ int main(void) {
 		if (ppl.freqOutUpdate) {
 			ppl.freqOutUpdate = false;
 			max2871ProgramFreqOut(&hspi2, &ppl);
-
-			if (ppl.hibridMode == 1) {
-				m24c64WriteNBytes(FREQ_OUT_ADDR, (uint8_t*) (&ppl.freqOut), 0,
-				FREQ_OUT_SIZE);
-				m24c64WriteNBytes(FREQ_BASE_ADDR, (uint8_t*) (&ppl.freqBase), 0,
-				FREQ_OUT_SIZE);
-				m24c64WriteNBytes(POUT_ADDR, (uint8_t*) (&ppl.register4.APWR),
-						0, FREQ_OUT_SIZE);
-
-			}
+			if (ppl.hibridMode == 1)
+				saveParameters(&ppl);
 		}
+
+		led_enable_kalive(&led);
 		HAL_IWDG_Refresh(&hiwdg);
 	}
 	/* USER CODE END WHILE */

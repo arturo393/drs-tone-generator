@@ -1,0 +1,14 @@
+../Core/Src/i2c1_master.c:10:6:i2cCleanBuffer	24	static
+../Core/Src/i2c1_master.c:17:6:i2c1MasterInit	8	static
+../Core/Src/i2c1_master.c:38:6:i2c1GpioInit	8	static
+../Core/Src/i2c1_master.c:67:6:i2c2MasterByteRx	32	static
+../Core/Src/i2c1_master.c:90:6:i2c1MasterFrameRx	32	static
+../Core/Src/i2c1_master.c:110:6:i2c1MasterStartTransfer	24	static
+../Core/Src/i2c1_master.c:132:6:i2c1AddresScanner	40	static
+../Core/Src/i2c1_master.c:156:6:i2c1MasterByteTx	24	static
+../Core/Src/i2c1_master.c:177:9:i2c1SlaveTx	24	static
+../Core/Src/i2c1_master.c:196:9:isCrcValid	32	static
+../Core/Src/i2c1_master.c:211:6:i2c1SlaveDelayedReset	16	static
+../Core/Src/i2c1_master.c:223:6:i2c1SlaveAddrsMatch	24	static
+../Core/Src/i2c1_master.c:235:6:i2c1SalveTx	24	static
+../Core/Src/i2c1_master.c:248:6:i2c1SalveRx	32	static

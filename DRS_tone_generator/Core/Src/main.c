@@ -185,7 +185,7 @@ void setModeCmd(const UART1_t *uart1, MAX2871_t *ppl) {
 	receiveValue |= uart1->rxBuffer[5] << 16;
 	receiveValue |= uart1->rxBuffer[6] << 8;
 	receiveValue |= uart1->rxBuffer[7];
-	  ppl->hibridMode = receiveValue;
+	ppl->hibridMode = receiveValue;
 	if (ppl->hibridMode == 0) { // Modo switch
 		HIBRID_MODE_OFF_LED();
 		sprintf(uart1->txBuffer, "SWITCH INITIALIZATION\n");
@@ -259,7 +259,7 @@ void freqOutRs485Update(const UART1_t *uart1, RS485_t *rs485, MAX2871_t *ppl) {
 	case SET_MODE: //cmd = 35
 		setModeCmd(uart1, ppl);
 		m24c64WriteNBytes(MODE_ADDR, (uint8_t*) (&ppl->hibridMode), 0,
-				FREQ_OUT_SIZE);
+		FREQ_OUT_SIZE);
 		rs485->cmd = NONE;
 		break;
 	default:
@@ -316,11 +316,11 @@ void getParametersFromEeprom(MAX2871_t *ppl) {
 
 void saveParameters(MAX2871_t *ppl) {
 	m24c64WriteNBytes(FREQ_OUT_ADDR, (uint8_t*) (&ppl->freqOut), 0,
-			FREQ_OUT_SIZE);
+	FREQ_OUT_SIZE);
 	m24c64WriteNBytes(FREQ_BASE_ADDR, (uint8_t*) (&ppl->freqBase), 0,
-			FREQ_OUT_SIZE);
+	FREQ_OUT_SIZE);
 	m24c64WriteNBytes(POUT_ADDR, (uint8_t*) (&ppl->register4.APWR), 0,
-			FREQ_OUT_SIZE);
+	FREQ_OUT_SIZE);
 }
 
 /* USER CODE END 0 */
@@ -389,6 +389,9 @@ int main(void) {
 		if (ppl.freqOutUpdate) {
 			ppl.freqOutUpdate = false;
 			max2871ProgramFreqOut(&hspi2, &ppl);
+			m24c64WriteNBytes(POUT_ADDR, (uint8_t*) (&ppl.register4.APWR), 0,
+			FREQ_OUT_SIZE);
+
 			if (ppl.hibridMode == 1)
 				saveParameters(&ppl);
 		}

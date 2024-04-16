@@ -165,12 +165,12 @@ void uart1_clean_buffer(UART1_t *u) {
 		for (int i = 0; i < TX_BUFFLEN; i++) {
 			if (i < RX_BUFFLEN)
 				u->rxBuffer[i] = 0x00;
-			u->txBuffer[i] = 0x00;
+			u->tx[i] = 0x00;
 		}
 	} else {
 		for (int i = 0; i < RX_BUFFLEN; i++) {
 			if (i < TX_BUFFLEN)
-				u->txBuffer[i] = 0x00;
+				u->tx[i] = 0x00;
 			u->rxBuffer[i] = 0x00;
 		}
 	}

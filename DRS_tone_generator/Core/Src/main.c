@@ -117,12 +117,12 @@ void freqOutCmdUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
 	receiveValue |= uart1->rxBuffer[7];
 	if ((receiveValue > FREQ_OUT_MIN) && (receiveValue < FREQ_OUT_MAX)) {
 		ppl->freqOut = receiveValue;
-		sprintf(uart1->txBuffer, "New Frequency Out: %u\n", receiveValue);
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "New Frequency Out: %u\n", receiveValue);
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 		ppl->freqOutUpdate = true;
 	} else {
-		sprintf(uart1->txBuffer, "OUT OF RANGE \n");
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "OUT OF RANGE \n");
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 	}
 }
 
@@ -137,17 +137,17 @@ void freqBaseCmdUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
 		ppl->freqBase = receiveValue;
 		ppl->freqOut = ppl->freqSumRead + ppl->freqBase;
 		ppl->freqOutUpdate = true;
-		sprintf(uart1->txBuffer, "New Base Frequency: %u\n", receiveValue);
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "New Base Frequency: %u\n", receiveValue);
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 	} else {
-		sprintf(uart1->txBuffer, "OUT OF RANGE \n");
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "OUT OF RANGE \n");
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 	}
 }
 
 void printParameters(const UART1_t *uart1, MAX2871_t *ppl) {
 	char *tx;
-	tx = (char*) uart1->txBuffer;
+	tx = (char*) uart1->tx;
 	unsigned long out = (unsigned long) ppl->freqOut;
 	unsigned long base = (unsigned long) ppl->freqBase;
 	sprintf(tx, "Frequency: %lu\nBase Frequency: %lu\n", out, base);
@@ -188,14 +188,14 @@ void setModeCmd(const UART1_t *uart1, MAX2871_t *ppl) {
 	ppl->hibridMode = receiveValue;
 	if (ppl->hibridMode == 0) { // Modo switch
 		HIBRID_MODE_OFF_LED();
-		sprintf(uart1->txBuffer, "SWITCH INITIALIZATION\n");
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "SWITCH INITIALIZATION\n");
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 
 	}
 	if (ppl->hibridMode == 1) { // Modo hibrido
 		HIBRID_MODE_ON_LED();
-		sprintf(uart1->txBuffer, "EEPROM INITIALIZATION\n");
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "EEPROM INITIALIZATION\n");
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 	}
 
 }
@@ -211,29 +211,29 @@ void powerOutCmdUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
 		//Power out -4dBm
 		ppl->register4.APWR = 0x0UL;
 		ppl->freqOutUpdate = true;
-		sprintf(uart1->txBuffer, "PdBm out = -4[dBm] \n");
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "PdBm out = -4[dBm] \n");
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 	}
 	if (receiveValue == 1) {
 		//Power out -1dBm
 		ppl->register4.APWR = 0x1UL;
 		ppl->freqOutUpdate = true;
-		sprintf(uart1->txBuffer, "PdBm out = -1[dBm] \n");
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "PdBm out = -1[dBm] \n");
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 	}
 	if (receiveValue == 2) {
 		//Power out +2dBm
 		ppl->register4.APWR = 0x2UL;
 		ppl->freqOutUpdate = true;
-		sprintf(uart1->txBuffer, "PdBm out = +2[dBm] \n");
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "PdBm out = +2[dBm] \n");
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 	}
 	if (receiveValue == 3) {
 		//Power out +5dBm
 		ppl->register4.APWR = 0x3UL;
 		ppl->freqOutUpdate = true;
-		sprintf(uart1->txBuffer, "PdBm out = +5[dBm] \n");
-		uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+		sprintf(uart1->tx, "PdBm out = +5[dBm] \n");
+		uart1_send_frame(uart1->tx, TX_BUFFLEN);
 	}
 }
 
@@ -258,7 +258,7 @@ void freqOutRs485Update(const UART1_t *uart1, RS485_t *rs485, MAX2871_t *ppl) {
 		break;
 	case SET_MODE: //cmd = 35
 		setModeCmd(uart1, ppl);
-		m24c64WriteNBytes(MODE_ADDR, (uint8_t*) (&ppl->hibridMode), 0,
+		save(MODE_ADDR, (uint8_t*) (&ppl->hibridMode), 0,
 		FREQ_OUT_SIZE);
 		rs485->cmd = NONE;
 		break;
@@ -280,8 +280,8 @@ void freqOutSWUpdate(const UART1_t *uart1, MAX2871_t *ppl) {
 	if ((HAL_GetTick() - ppl->lastFreqSumReadTick) > SW_DEBOUNCE) {
 		if (ppl->freqSumNew != ppl->freqSumCurrent) {
 			ppl->freqOut = ppl->freqSumNew + ppl->freqBase;
-			sprintf(uart1->txBuffer, "New Frequency Out: %u\n", ppl->freqOut);
-			uart1_send_frame(uart1->txBuffer, TX_BUFFLEN);
+			sprintf(uart1->tx, "New Frequency Out: %u\n", ppl->freqOut);
+			uart1_send_frame(uart1->tx, TX_BUFFLEN);
 			ppl->freqOutUpdate = true;
 			FREQ_CHANGING_OFF_LED();
 			ppl->freqSumCurrent = ppl->freqSumNew;
@@ -315,11 +315,11 @@ void getParametersFromEeprom(MAX2871_t *ppl) {
 }
 
 void saveParameters(MAX2871_t *ppl) {
-	m24c64WriteNBytes(FREQ_OUT_ADDR, (uint8_t*) (&ppl->freqOut), 0,
+	save(FREQ_OUT_ADDR, (uint8_t*) (&ppl->freqOut), 0,
 	FREQ_OUT_SIZE);
-	m24c64WriteNBytes(FREQ_BASE_ADDR, (uint8_t*) (&ppl->freqBase), 0,
+	save(FREQ_BASE_ADDR, (uint8_t*) (&ppl->freqBase), 0,
 	FREQ_OUT_SIZE);
-	m24c64WriteNBytes(POUT_ADDR, (uint8_t*) (&ppl->register4.APWR), 0,
+	save(POUT_ADDR, (uint8_t*) (&ppl->register4.APWR), 0,
 	FREQ_OUT_SIZE);
 }
 
@@ -358,11 +358,11 @@ int main(void) {
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-	//MX_I2C1_Init();
+	MX_I2C1_Init();
 	MX_SPI2_Init();
 	//MX_USART1_UART_Init();
 	MX_CRC_Init();
-	MX_IWDG_Init();
+	//MX_IWDG_Init();
 	/* USER CODE BEGIN 2 */
 	toneUhfInit(UHF_TONE, ID0, &uhf);
 	rs485Init(&rs485);
@@ -389,7 +389,7 @@ int main(void) {
 		if (ppl.freqOutUpdate) {
 			ppl.freqOutUpdate = false;
 			max2871ProgramFreqOut(&hspi2, &ppl);
-			m24c64WriteNBytes(POUT_ADDR, (uint8_t*) (&ppl.register4.APWR), 0,
+			save(POUT_ADDR, (uint8_t*) (&ppl.register4.APWR), 0,
 			FREQ_OUT_SIZE);
 
 			if (ppl.hibridMode == 1)
@@ -397,7 +397,7 @@ int main(void) {
 		}
 
 		led_enable_kalive(&led);
-		HAL_IWDG_Refresh(&hiwdg);
+		//HAL_IWDG_Refresh(&hiwdg);
 	}
 	/* USER CODE END WHILE */
 

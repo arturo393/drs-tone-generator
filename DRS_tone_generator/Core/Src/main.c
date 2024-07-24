@@ -296,7 +296,7 @@ void getParametersFromEeprom(MAX2871_t *ppl) {
 
 	ppl->register4.APWR = getULFromEeprom(POUT_ADDR);
 	if ((ppl->register4.APWR < 0x0UL) || (ppl->register4.APWR > 0x3UL))
-		ppl->register4.APWR = 0x1UL;
+		ppl->register4.APWR = 0x3UL;
 
 	ppl->hibridMode = getULFromEeprom(MODE_ADDR);
 	if ((ppl->hibridMode < 0) || (ppl->hibridMode > 1))
@@ -375,7 +375,15 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	max2871RegisterInit(&hspi2, &ppl); //
-	getParametersFromEeprom(&ppl);
+	ppl.freqBase = FREQ_BASE_DEFAULT;
+	ppl.register4.APWR = 0x3UL;
+	ppl.hibridMode = 0;
+	ppl.freqSumNew = getFreqSum(ppl.freqBase);
+	ppl.freqSumRead = ppl.freqSumNew;
+	ppl.freqSumCurrent = ppl.freqSumNew;
+	ppl.freqOut = FREQ_BASE_DEFAULT + ppl.freqSumCurrent;
+
+	ppl.register4.APWR = 0x3UL;
 	max2871ProgramFreqOut(&hspi2, &ppl);
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
 	printParameters(&uart1, &ppl);

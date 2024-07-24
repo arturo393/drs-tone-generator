@@ -249,15 +249,16 @@ void writeRegister4(MAX2871_t *ppl, SPI_HandleTypeDef *hspi2) {
 void max2871ProgramFreqOut(SPI_HandleTypeDef *hspi2, MAX2871_t *ppl) // Compose register value of register 0 and 4
 {
 	double rest;
+	int multiplier = 8, diva = 3;
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_RESET);
 	ppl->register4.RFA_EN = 0x0UL; // Disabled
 	writeRegister4(ppl, hspi2);
-	ppl->register0.NDIV = ppl->freqOut * 32 / (unsigned long) FREQ_REF;
-	rest = ppl->freqOut * 32 % (unsigned long) FREQ_REF;
+	ppl->register0.NDIV = ppl->freqOut * multiplier / (unsigned long) FREQ_REF;
+	rest = ppl->freqOut * multiplier % (unsigned long) FREQ_REF;
 	ppl->register0.FRAC = rest / (unsigned long) FREQ_REF * RESOLUTION;
 	writeRegister0(ppl, hspi2);
 	waitForLock();
-	ppl->register4.DIVA = 5;
+	ppl->register4.DIVA = diva;
 	ppl->register4.RFA_EN = 0X1UL; // Enabled
 	writeRegister4(ppl, hspi2);
 	HAL_GPIO_WritePin(GPIOA, MAX_RF_ENABLE_Pin, GPIO_PIN_SET);
